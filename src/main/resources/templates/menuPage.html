@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online Food Ordering</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #1e1e2f; /* Dark background */
+            color: #e0e0e0; /* Light text color */
+        }
+
+        header {
+            background-color: #ff4d4d; /* Bright accent color */
+            color: white;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #2a2a3c; /* Darker container */
+            border-radius: 8px; /* Rounded corners */
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+        }
+
+        .category {
+            display: flex;
+            justify-content: space-between; /* Adjusted to create space for the profile button */
+            padding: 10px;
+            background-color: #3c3c4f; /* Darker category background */
+            border-radius: 8px; /* Rounded corners */
+            margin-bottom: 20px;
+            position: relative; /* Position for dropdown */
+        }
+
+        .category a {
+            color: #e0e0e0;
+            text-decoration: none;
+            padding: 10px 20px;
+            background-color: #4a4a6d; /* Button background */
+            border-radius: 5px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.3s;
+        }
+
+        .category a:hover {
+            background-color: #ff4d4d; /* Accent color on hover */
+            color: white;
+        }
+
+        /* Round User Profile button styles */
+        .profile-btn {
+            background-color: #ff4d4d; /* Bright accent color for the round button */
+            color: white;
+            width: 40px; /* Set width for round button */
+            height: 40px; /* Set height for round button */
+            border-radius: 50%; /* Makes it round */
+            display: flex;
+            align-items: center; /* Center icon vertically */
+            justify-content: center; /* Center icon horizontally */
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); /* Shadow for depth */
+            transition: background-color 0.3s, transform 0.2s; /* Transition effects */
+        }
+
+        .profile-btn:hover {
+            background-color: #d43d3d; /* Darker red on hover */
+            transform: translateY(-2px); /* Slight lift on hover */
+        }
+
+        /* Dropdown styles */
+        .profile-dropdown {
+            display: none;
+            position: absolute;
+            top: 100%; /* Position below the nav */
+            right: 0; /* Align to the right */
+            background-color: #4a4a6d; /* Dropdown background */
+            border-radius: 5px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            z-index: 1000; /* On top of other elements */
+        }
+
+        .profile-dropdown a {
+            display: block;
+            color: #e0e0e0;
+            padding: 10px 20px;
+            text-decoration: none;
+            transition: background-color 0.3s;
+        }
+
+        .profile-dropdown a:hover {
+            background-color: #ff4d4d; /* Accent color on hover */
+        }
+
+        .food-item {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .food-item .item {
+            width: 30%;
+            background-color: #3c3c4f; /* Dark item background */
+            padding: 15px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            margin-bottom: 20px;
+            text-align: center;
+            border-radius: 10px;
+            transition: transform 0.2s;
+        }
+
+        .food-item .item:hover {
+            transform: scale(1.05); /* Slight scale effect on hover */
+        }
+
+        .food-item .item img {
+            width: 100%;
+            border-radius: 10px;
+            max-height: 150px; /* Fixed height for images */
+            object-fit: cover; /* Cover for image scaling */
+        }
+
+        .food-item .item h3 {
+            margin: 10px 0;
+            color: #ff4d4d; /* Title color */
+        }
+
+        .food-item .item p {
+            color: #b0b0b0; /* Description color */
+            margin-bottom: 10px;
+        }
+
+        .food-item .item .price {
+            color: #ff4d4d; /* Price color */
+            font-size: 20px; /* Larger price font */
+            margin-bottom: 10px;
+        }
+
+        .food-item .item button {
+            background-color: #ff4d4d; /* Button background */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s, transform 0.2s;
+        }
+
+        .food-item .item button:hover {
+            background-color: #d43d3d; /* Darker red on hover */
+            transform: translateY(-2px); /* Slight lift on hover */
+        }
+
+        footer {
+            background-color: #333; /* Footer background */
+            color: white;
+            padding: 10px;
+            text-align: center;
+            margin-top: 20px;
+            border-radius: 8px; /* Rounded corners */
+        }
+
+        .btn {
+            background-color: #ff4d4d; /* Bright accent color for the button */
+            color: white;
+            padding: 12px 25px; /* Increased padding for a larger button */
+            border: none;
+            border-radius: 5px; /* Rounded corners */
+            cursor: pointer;
+            font-size: 16px; /* Slightly larger font size */
+            transition: background-color 0.3s, transform 0.2s; /* Transition effects */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Shadow for depth */
+        }
+
+        .btn:hover {
+            background-color: #d43d3d; /* Darker red on hover */
+            transform: translateY(-2px); /* Slight lift on hover */
+        }
+
+        .btn:active {
+            transform: translateY(1px); /* Slight press effect */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5); /* Reduced shadow on click */
+        }
+    </style>
+    <script>
+        // Function to toggle the dropdown menu
+        function toggleDropdown() {
+            const dropdown = document.getElementById("profileDropdown");
+            dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+        }
+
+        // Function to hide dropdown when clicking outside
+        window.onclick = function(event) {
+            if (!event.target.matches('.profile-btn')) {
+                const dropdown = document.getElementById("profileDropdown");
+                if (dropdown.style.display === "block") {
+                    dropdown.style.display = "none";
+                }
+            }
+        };
+    </script>
+</head>
+<body>
+
+<header>
+    <h1>Welcome to Fast Food Online Ordering</h1>
+</header>
+
+<div class="container">
+    <nav class="category">
+        <div style="flex-grow: 1;"> <!-- Space for category links -->
+            <a th:each="category : ${categoryList}"
+               th:href="@{/category/{id}(id=${category.id})}"
+               th:text="${category.name}">
+            </a>
+        </div>
+        <button class="profile-btn" onclick="toggleDropdown()">👤</button> <!-- Profile button with icon -->
+        <div id="profileDropdown" class="profile-dropdown">
+            <a href="/basket">Basket</a>
+            <a href="/order-history">Order History</a>
+            <a href="/edit-profile">Edit Profile</a>
+        </div>
+    </nav>
+
+    <section class="food-item">
+        <div th:each="food : ${selectedFoods}" class="item">
+            <h3 th:text="${food.name}"></h3>
+            <p th:text="${food.description}"></p>
+            <p class="price" th:text="${food.price}"></p>
+            <button>Add to Cart</button>
+        </div>
+    </section>
+</div>
+
+<form action="/logout" method="post" style="text-align: center; margin-top: 20px;">
+    <button type="submit" class="btn">Log Out</button>
+</form>
+
+</body>
+</html>
