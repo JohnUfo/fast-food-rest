@@ -1,5 +1,6 @@
 package fast_food_rest.controller;
 
+import fast_food_rest.entity.Role;
 import fast_food_rest.entity.User;
 import fast_food_rest.security.JwtProvider;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +21,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 public class LoginController {
@@ -31,7 +35,6 @@ public class LoginController {
     @Autowired
     private JwtProvider jwtProvider;
 
-    // Serve the login.html file
     @GetMapping(value = "/login", produces = MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<byte[]> getLoginPage() throws IOException {
         ClassPathResource resource = new ClassPathResource("static/login.html");
@@ -42,22 +45,28 @@ public class LoginController {
         return new ResponseEntity<>(content, headers, HttpStatus.OK);
     }
 
-    @PostMapping("login")
+    @PostMapping("/login")
     public ResponseEntity<Map<String, Object>> login(@RequestParam String email,
                                                      @RequestParam String password) {
         Map<String, Object> response = new HashMap<>();
         try {
+
             Authentication authenticate = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password)
             );
 
             User user = (User) authenticate.getPrincipal();
-            String token = jwtProvider.generateToken(user.getEmail(), user); // Pass full name
+            String token = jwtProvider.generateToken(user.getEmail(), user);
+
+            Set<Role> roles = user.getRoles();
+            List<String> roleNames = roles.stream().map(Role::getName).collect(Collectors.toList());
 
             response.put("success", true);
             response.put("token", token);
-            response.put("user", user); // Optionally send user info back
+            response.put("user", user);
+            response.put("roles", roleNames);
             return new ResponseEntity<>(response, HttpStatus.OK);
+
         } catch (Exception e) {
             response.put("success", false);
             response.put("message", "Invalid email or password");
@@ -65,7 +74,7 @@ public class LoginController {
         }
     }
 
-    // API endpoint to return JSON data
+
     @GetMapping("/api/data")
     public ResponseEntity<Map<String, String>> getApiData() {
         Map<String, String> data = new HashMap<>();

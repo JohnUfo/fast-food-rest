@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.http.HttpMethod;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.JavaMailSenderImpl;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -37,10 +38,12 @@ public class SecurityConfig {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-//                .authorizeHttpRequests()
-//                .requestMatchers("/admin/**").hasRole("ADMIN")
-//                .anyRequest().permitAll()
-//                .and()
+                .authorizeRequests()
+                .requestMatchers("/category/**").permitAll()
+                .requestMatchers(HttpMethod.POST, "/category/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.PUT, "/category/**").hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE, "/category/**").hasRole("ADMIN")
+                .and()
                 .logout()
                 .logoutUrl("/logout")
                 .logoutSuccessUrl("/")
