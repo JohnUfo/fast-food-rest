@@ -30,8 +30,6 @@
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    console.log(data.roles); // This logs the entire array of roles
-                    console.log("User Details:", data.userDetails);
 
                     // Check if the user has the admin role
                     const hasAdminRole = data.roles.some(role => role.name === 'ADMIN'); // Adjust based on your role object structure
@@ -40,15 +38,6 @@
                         window.location.href = 'index.html';
                         return; // Exit the function
                     }
-
-                    // Construct user details to display
-                    const userDetailsDiv = document.getElementById('userDetails');
-
-                    userDetailsDiv.innerHTML = `
-                <h4>User Details</h4>
-                <p>Email: ${data.email}</p>
-                <p>Roles: ${data.roles.map(role => role.name).join(', ')}</p> <!-- Adjust based on your role object structure -->
-            `;
                 } else {
                     console.error('Failed to fetch user details:', data.message);
                     window.location.href = 'index.html';
