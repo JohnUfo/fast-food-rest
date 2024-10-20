@@ -44,12 +44,6 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.PUT, "/category/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/category/**").hasRole("ADMIN")
                 .and()
-                .logout()
-                .logoutUrl("/logout")
-                .logoutSuccessUrl("/")
-                .invalidateHttpSession(true)
-                .deleteCookies("JSESSIONID")
-                .and()
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

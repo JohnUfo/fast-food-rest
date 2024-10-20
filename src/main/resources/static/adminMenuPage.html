@@ -12,35 +12,45 @@
     <h2 class="text-center">Admin Menu</h2>
     <button class="btn btn-primary" onclick="window.location.href='userList.html'">See Users List</button>
     <button class="btn btn-primary" onclick="window.location.href='categories.html'">Manage Categories</button>
-    <button class="btn btn-primary" onclick="window.location.href='foods.html'">Manage Foods</button>
     <button class="btn btn-danger" onclick="logout()">Logout</button>
 </div>
 
 <script>
-    // Function to check if the user has the admin role
-    function checkAdminAccess() {
+    // Check if the user is logged in by verifying if the JWT token exists
+    document.addEventListener('DOMContentLoaded', function () {
         const token = localStorage.getItem('JWT_TOKEN');
-        if (token) {
-            // Decode the JWT token to get user information
-            const decodedToken = jwt_decode(token);
-
-
-            const roles = decodedToken.roles || [];
-            if (!roles.includes('ADMIN')) {
-                // If the user does not have the admin role, redirect them
-                alert("You do not have access to this page!");
-                window.location.href = 'userMenuPage.html';
-            }
-        } else {
-            // If no token is found, redirect to login page
-            window.location.href = 'login.html';
+        if (!token) {
+            // If no token is found, redirect to the login page
+            window.location.href = 'index.html';
         }
+    });
+
+    // Logout function
+    function logout() {
+        const token = localStorage.getItem('JWT_TOKEN');
+
+        fetch('/api/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    // Remove the token from local storage after successful logout
+                    localStorage.removeItem('JWT_TOKEN');
+                    // Redirect to the login page
+                    window.location.href = 'index.html';
+                } else {
+                    console.error('Failed to log out');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
     }
-
-    // Call the function to check for admin access
-    checkAdminAccess();
 </script>
-
 
 </body>
 </html>

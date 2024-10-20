@@ -16,9 +16,39 @@
 </div>
 
 <script>
+    // Check if the user is logged in by verifying if the JWT token exists
+    document.addEventListener('DOMContentLoaded', function () {
+        const token = localStorage.getItem('JWT_TOKEN');
+        if (!token) {
+            // If no token is found, redirect to the login page
+            window.location.href = 'index.html';
+        }
+    });
+
+    // Logout function
     function logout() {
-        localStorage.removeItem('JWT_TOKEN');
-        window.location.href = 'index.html';
+        const token = localStorage.getItem('JWT_TOKEN');
+
+        fetch('/api/logout', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    // Remove the token from local storage after successful logout
+                    localStorage.removeItem('JWT_TOKEN');
+                    // Redirect to the login page
+                    window.location.href = 'index.html';
+                } else {
+                    console.error('Failed to log out');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
     }
 </script>
 
