@@ -31,12 +31,16 @@
             .then(data => {
                 if (data.success) {
 
-                    // Check if the user has the admin role
-                    const hasAdminRole = data.roles.some(role => role.name === 'ADMIN'); // Adjust based on your role object structure
-                    if (!hasAdminRole) {
-                        // If the user does not have the admin role, redirect to the login page
+                    const isAdmin = data.roles.some(role => role.name === 'ADMIN'); // Adjust based on your role object structure
+                    const isUser = data.roles.some(role => role.name === 'USER'); // Adjust based on your role object structure
+
+                    if (isUser) {
+                        // If the user is an admin, redirect to the admin menu page
+                        window.location.href = 'userMenuPage.html';
+                        return; // Exit the function to prevent further execution
+                    }
+                    if (!isAdmin) {
                         window.location.href = 'index.html';
-                        return; // Exit the function
                     }
                 } else {
                     console.error('Failed to fetch user details:', data.message);
