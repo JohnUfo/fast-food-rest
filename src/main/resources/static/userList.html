@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users List</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+</head>
+<body>
+
+<div class="container">
+    <h2 class="text-center">Users List</h2>
+    <table class="table table-bordered">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Email</th>
+            <th>Roles</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody id="userTableBody">
+        <!-- Rows will be dynamically added here -->
+        </tbody>
+    </table>
+</div>
+
+<!-- Role Editing Modal -->
+<div class="modal fade" id="editRoleModal" tabindex="-1" aria-labelledby="editRoleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editRoleModalLabel">Edit User Roles</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="roleForm">
+                    <div class="mb-3">
+                        <label for="currentRoles" class="form-label">Current Roles</label>
+                        <ul id="currentRolesList" class="list-group">
+                            <!-- Current roles will be listed here -->
+                        </ul>
+                    </div>
+                    <div class="mb-3">
+                        <label for="newRole" class="form-label">Add New Role</label>
+                        <select class="form-control" id="newRole">
+                            <!-- Roles will be dynamically loaded here -->
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="addRoleBtn">Add Role</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Fetch users list from the server
+    function fetchUsers() {
+        const token = localStorage.getItem('JWT_TOKEN');
+        fetch('/api/users', {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        })
+            .then(response => response.json())
+            .then(users => {
+                const tableBody = document.getElementById('userTableBody');
+                tableBody.innerHTML = ''; // Clear table body
+
+                users.forEach(user => {
+                    const roles = user.roles.map(role => role.name).join(', ');
+                    const row = `
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${user.email}</td>
+                        <td>${roles}</td>
+                        <td>
+                            <button class="btn btn-primary" onclick="openEditRoleModal(${user.id}, '${roles}')">Edit Roles</button>
+                        </td>
+                    </tr>
+                `;
+                    tableBody.innerHTML += row;
+                });
+            })
+            .catch(error => console.error('Error fetching users:', error));
+    }
+
+    // Fetch available roles from the server and populate the dropdown
+    function fetchRoles() {
+        const token = localStorage.getItem('JWT_TOKEN');
+        fetch('/api/roles', {
+            headers: {
+                'Authorization': 'Bearer ' + token
+            }
+        })
+            .then(response => response.json())
+            .then(roles => {
+                const newRoleSelect = document.getElementById('newRole');
+                newRoleSelect.innerHTML = ''; // Clear existing options
+
+                roles.forEach(role => {
+                    const option = document.createElement('option');
+                    option.value = role;
+                    option.textContent = role;
+                    newRoleSelect.appendChild(option);
+                });
+            })
+            .catch(error => console.error('Error fetching roles:', error));
+    }
+
+    // Function to open the role editing modal
+    function openEditRoleModal(userId, currentRoles) {
+        const currentRolesList = document.getElementById('currentRolesList');
+        currentRolesList.innerHTML = ''; // Clear current roles list
+
+        const rolesArray = currentRoles.split(', ');
+
+        rolesArray.forEach(role => {
+            const listItem = document.createElement('li');
+            listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+            listItem.innerHTML = `
+                ${role}
+                <button class="btn btn-danger btn-sm" onclick="removeRole(${userId}, '${role}')">Remove</button>
+            `;
+            currentRolesList.appendChild(listItem);
+        });
+
+        // Store user ID in save button for adding new role
+        document.getElementById('addRoleBtn').setAttribute('data-user-id', userId);
+
+        fetchRoles(); // Fetch and populate roles when the modal is opened
+
+        const editRoleModal = new bootstrap.Modal(document.getElementById('editRoleModal'));
+        editRoleModal.show();
+    }
+
+    // Function to remove a role from a user
+    function removeRole(userId, role) {
+        const token = localStorage.getItem('JWT_TOKEN');
+        fetch(`/api/users/${userId}/roles`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify([role]) // Send the role to be removed in an array
+        })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                fetchUsers(); // Refresh the users list after updating roles
+            })
+            .catch(error => console.error('Error removing role:', error));
+    }
+
+    // Function to add a new role to the user
+    document.getElementById('addRoleBtn').addEventListener('click', function () {
+        const userId = this.getAttribute('data-user-id');
+        const newRole = document.getElementById('newRole').value;
+
+        const token = localStorage.getItem('JWT_TOKEN');
+        fetch(`/api/users/${userId}/roles`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': 'Bearer ' + token,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify([newRole]) // Send the new role in an array
+        })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);
+                fetchUsers(); // Refresh the users list after updating roles
+
+                const editRoleModal = bootstrap.Modal.getInstance(document.getElementById('editRoleModal'));
+                editRoleModal.hide();
+            })
+            .catch(error => console.error('Error adding new role:', error));
+    });
+
+    fetchUsers();
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
