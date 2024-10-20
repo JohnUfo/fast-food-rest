@@ -36,52 +36,5 @@
 
 </div>
 
-<script>
-    function fetchUserData() {
-        const token = localStorage.getItem('JWT_TOKEN');
-
-        // Verify the user's token and get user details
-        fetch('/api/users/getUserDetails', {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${token}`
-            }
-        })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-
-                    const isAdmin = data.roles.some(role => role.name === 'ADMIN'); // Adjust based on your role object structure
-                    const isUser = data.roles.some(role => role.name === 'USER'); // Adjust based on your role object structure
-
-                    if (isAdmin) {
-                        // If the user is an admin, redirect to the admin menu page
-                        window.location.href = 'adminMenuPage.html';
-                        return; // Exit the function to prevent further execution
-                    }
-                    if (!isUser) {
-                        window.location.href = 'index.html';
-                    }
-                } else {
-                    console.error('Failed to fetch user details:', data.message);
-                    window.location.href = 'index.html';
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching user details:', error);
-                window.location.href = 'index.html';
-            });
-    }
-
-    document.addEventListener('DOMContentLoaded', function () {
-        const token = localStorage.getItem('JWT_TOKEN');
-        if (!token) {
-            window.location.href = 'index.html';
-            return;
-        }
-        fetchUserData();
-    });
-</script>
-
 </body>
 </html>
