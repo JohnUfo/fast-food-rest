@@ -10,19 +10,63 @@
 
 <div class="container">
     <h2 class="text-center">Admin Menu</h2>
+    <div id="userDetails" class="mb-4"></div> <!-- Placeholder for user details -->
     <button class="btn btn-primary" onclick="window.location.href='userList.html'">See Users List</button>
     <button class="btn btn-primary" onclick="window.location.href='categories.html'">Manage Categories</button>
     <button class="btn btn-danger" onclick="logout()">Logout</button>
 </div>
 
 <script>
-    // Check if the user is logged in by verifying if the JWT token exists
+    function fetchUserData() {
+        const token = localStorage.getItem('JWT_TOKEN');
+
+        // Verify the user's token and get user details
+        fetch('/api/users/getUserDetails', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    console.log(data.roles); // This logs the entire array of roles
+                    console.log("User Details:", data.userDetails);
+
+                    // Check if the user has the admin role
+                    const hasAdminRole = data.roles.some(role => role.name === 'ADMIN'); // Adjust based on your role object structure
+                    if (!hasAdminRole) {
+                        // If the user does not have the admin role, redirect to the login page
+                        window.location.href = 'index.html';
+                        return; // Exit the function
+                    }
+
+                    // Construct user details to display
+                    const userDetailsDiv = document.getElementById('userDetails');
+
+                    userDetailsDiv.innerHTML = `
+                <h4>User Details</h4>
+                <p>Email: ${data.email}</p>
+                <p>Roles: ${data.roles.map(role => role.name).join(', ')}</p> <!-- Adjust based on your role object structure -->
+            `;
+                } else {
+                    console.error('Failed to fetch user details:', data.message);
+                    window.location.href = 'index.html';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching user details:', error);
+                window.location.href = 'index.html';
+            });
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         const token = localStorage.getItem('JWT_TOKEN');
         if (!token) {
-            // If no token is found, redirect to the login page
             window.location.href = 'index.html';
+            return;
         }
+        fetchUserData();
     });
 
     // Logout function

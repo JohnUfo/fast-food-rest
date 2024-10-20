@@ -43,6 +43,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.POST, "/category/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.PUT, "/category/**").hasRole("ADMIN")
                 .requestMatchers(HttpMethod.DELETE, "/category/**").hasRole("ADMIN")
+//                .requestMatchers("/userMenuPage.html").hasRole("USER")
+//                .requestMatchers("/adminMenuPage.html").hasRole("ADMIN")
                 .and()
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

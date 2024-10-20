@@ -2,20 +2,29 @@ package fast_food_rest.controller;
 
 import fast_food_rest.entity.User;
 import fast_food_rest.payload.ApiResponse;
+import fast_food_rest.repository.UserRepository;
 import fast_food_rest.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
+
+    @Autowired
+    AuthenticationManager authenticationManager;
+
+    @Autowired
+    UserRepository userRepository;
 
     @Autowired
     private UserService userService;
@@ -45,5 +54,20 @@ public class UserController {
         }
     }
 
+    @GetMapping("/getUserDetails")
+    public Map<String, Object> getUserDetails(@AuthenticationPrincipal User user) {
+        Map<String, Object> response = new HashMap<>();
+
+        if (user != null) {
+                response.put("success", true);
+                response.put("roles", user.getRoles());
+                response.put("email", user.getEmail());
+        } else {
+            response.put("success", false);
+            response.put("message", "Authentication required");
+        }
+
+        return response;
+    }
 }
 

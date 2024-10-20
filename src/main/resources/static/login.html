@@ -25,35 +25,32 @@
 </div>
 
 <script>
+
     document.getElementById('loginForm').addEventListener('submit', function (event) {
         event.preventDefault();
 
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
 
-
-        //Catch with @PostMapping("/login")
-        //Get values with @RequestParam
+        // Send login request
         fetch('/login?email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password), {
             method: 'POST',
         })
             .then(response => response.json())
             .then(data => {
-                if (data.success) { // if success true then check user's role and redirect them to their own page
+                if (data.success) {
+                    // Store the token in localStorage
                     localStorage.setItem('JWT_TOKEN', data.token);
 
-                    // Get the user's roles
+                    // Get the user's roles and redirect accordingly
                     const roles = data.roles;
-
-                    // Check if the user is an admin
                     if (roles.includes('ADMIN')) {
-                        window.location.href = 'adminMenuPage.html'; // Redirect to admin menu
+                        window.location.href = 'adminMenuPage.html';
                     } else {
-                        window.location.href = 'userMenuPage.html'; // Redirect to user menu
+                        window.location.href = 'userMenuPage.html';
                     }
                 } else {
-                    // Show error message
-                    document.getElementById('message').innerText = data.message;
+                    document.getElementById('message').innerText = data.message; // Show error message
                 }
             })
             .catch(error => console.error('Error:', error));
