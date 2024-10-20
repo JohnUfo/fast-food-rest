@@ -20,7 +20,7 @@ import java.nio.file.Path;
 public class RegistrationController {
 
     @Autowired
-    private AuthService authService; // Assuming you have a service for user operations
+    private AuthService authService;
 
     @GetMapping(value = "/register", produces = MediaType.TEXT_HTML_VALUE)
     public ResponseEntity<byte[]> getRegisterPage() throws IOException {

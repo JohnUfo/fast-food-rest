@@ -48,7 +48,7 @@
                 document.getElementById('message').innerText = data.message;
                 if (data.success) {
                     // Redirect to the email verification page after successful registration
-                    window.location.href = 'verify-email.html'; // Update with the correct path to your verification page
+                    window.location.href = 'verify-email.html';
                 }
             })
             .catch(error => console.error('Error:', error));

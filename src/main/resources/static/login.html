@@ -31,13 +31,15 @@
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
 
+
+        //Catch with @PostMapping("/login")
+        //Get values with @RequestParam
         fetch('/login?email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password), {
             method: 'POST',
         })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    // Store the JWT token in local storage
+                if (data.success) { // if success true then check user's role and redirect them to their own page
                     localStorage.setItem('JWT_TOKEN', data.token);
 
                     // Get the user's roles

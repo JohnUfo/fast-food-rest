@@ -12,7 +12,6 @@
     <h2 class="text-center">Categories</h2>
     <ul id="categoryList"></ul>
 
-    <!-- Admin-only actions (Add Category, Edit, Delete) -->
     <div id="adminActions" style="display: none;">
         <button id="addCategoryBtn" class="btn btn-success">Add Category</button>
     </div>
@@ -20,7 +19,7 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", function () {
-        // Fetch all categories
+
         fetch('/category')
             .then(response => response.json())
             .then(data => {
@@ -33,7 +32,7 @@
             });
 
         // Check if the user is an admin
-        fetch('/auth/me')  // Assuming you have an endpoint to get the user's details
+        fetch('/auth/me')
             .then(response => response.json())
             .then(data => {
                 if (data.roles.includes('ADMIN')) {

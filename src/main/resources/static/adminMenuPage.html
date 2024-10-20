@@ -24,7 +24,7 @@
             // Decode the JWT token to get user information
             const decodedToken = jwt_decode(token);
 
-            // Check the user's roles (assumes roles are part of the token payload)
+
             const roles = decodedToken.roles || [];
             if (!roles.includes('ADMIN')) {
                 // If the user does not have the admin role, redirect them

@@ -75,11 +75,4 @@ public class LoginController {
     }
 
 
-    @GetMapping("/api/data")
-    public ResponseEntity<Map<String, String>> getApiData() {
-        Map<String, String> data = new HashMap<>();
-        data.put("message", "Hello from the API!");
-        data.put("status", "success");
-        return new ResponseEntity<>(data, HttpStatus.OK);
-    }
 }
