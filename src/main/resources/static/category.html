@@ -20,7 +20,7 @@
 <script>
     document.addEventListener("DOMContentLoaded", function () {
 
-        fetch('/category')
+        fetch('/categories')
             .then(response => response.json())
             .then(data => {
                 const categoryList = document.getElementById('categoryList');

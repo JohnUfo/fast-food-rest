@@ -2,15 +2,11 @@ package fast_food_rest.controller;
 
 import fast_food_rest.entity.User;
 import fast_food_rest.payload.ApiResponse;
-import fast_food_rest.repository.UserRepository;
 import fast_food_rest.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,12 +15,6 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
-
-    @Autowired
-    AuthenticationManager authenticationManager;
-
-    @Autowired
-    UserRepository userRepository;
 
     @Autowired
     private UserService userService;

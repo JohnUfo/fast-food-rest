@@ -1,13 +1,16 @@
 package fast_food_rest.service;
 
-
 import fast_food_rest.entity.Category;
-import fast_food_rest.payload.ApiResponse;
+import fast_food_rest.entity.Food;
+import fast_food_rest.payload.CategoryDto;
 import fast_food_rest.repository.CategoryRepository;
+import fast_food_rest.repository.FoodRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class CategoryService {
@@ -15,32 +18,36 @@ public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    public List<Category> getAllCategories() {
-        return categoryRepository.findAll();
+    @Autowired
+    private FoodRepository foodRepository;
+
+    public List<CategoryDto> getAllCategories() {
+        return categoryRepository.findAll().stream()
+                .map(category -> new CategoryDto(category.getId(), category.getName()))
+                .collect(Collectors.toList());
     }
 
-    public ApiResponse createCategory(Category category) {
-        if (categoryRepository.existsByName(category.getName())) {
-            return new ApiResponse("Category already exists", false);
+    public boolean createCategory(Category category) {
+        boolean existsByName = categoryRepository.existsByName(category.getName());
+        if (existsByName) {
+            return false;
         }
         categoryRepository.save(category);
-        return new ApiResponse("Category created successfully", true);
+        return true;
     }
 
-    public ApiResponse updateCategory(Integer id, Category newCategory) {
-        return categoryRepository.findById(id).map(category -> {
-            category.setName(newCategory.getName());
-            categoryRepository.save(category);
-            return new ApiResponse("Category updated successfully", true);
-        }).orElse(new ApiResponse("Category not found", false));
+    public List<Food> getFoodsByCategoryId(Integer categoryId) {
+        return foodRepository.findAllByCategoryId(categoryId);
     }
 
-    public ApiResponse deleteCategory(Integer id) {
-        if (!categoryRepository.existsById(id)) {
-            return new ApiResponse("Category not found", false);
+    public boolean updateCategory(Integer id, Category updatedCategory) {
+        Optional<Category> optionalCategory = categoryRepository.findById(id);
+        if (optionalCategory.isEmpty()) {
+            return false;
         }
-        categoryRepository.deleteById(id);
-        return new ApiResponse("Category deleted successfully", true);
+        Category category = optionalCategory.get();
+        category.setName(updatedCategory.getName());
+        categoryRepository.save(category);
+        return true;
     }
 }
-

@@ -1,47 +1,77 @@
 package fast_food_rest.controller;
 
 import fast_food_rest.entity.Category;
-import fast_food_rest.payload.ApiResponse;
+import fast_food_rest.entity.Food;
+import fast_food_rest.payload.CategoryDto;
+import fast_food_rest.repository.CategoryRepository;
 import fast_food_rest.service.CategoryService;
+import jakarta.servlet.http.HttpServlet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
-@RequestMapping("/category")
+@RequestMapping("/categories")
 public class CategoryController {
 
     @Autowired
-    private CategoryService categoryService;
+    private CategoryService categoryService; // Assume you have a service layer
+    @Autowired
+    private CategoryRepository categoryRepository;
+
 
     @GetMapping
-    public ResponseEntity<List<Category>> getAllCategories() {
-        List<Category> categories = categoryService.getAllCategories();
-        return new ResponseEntity<>(categories, HttpStatus.OK);
+    public ResponseEntity<?> getAllCategories() {
+        try {
+            List<CategoryDto> categories = categoryService.getAllCategories();
+            return ResponseEntity.ok(categories);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<ApiResponse> createCategory(@RequestBody Category category) {
-        ApiResponse response = categoryService.createCategory(category);
-        return new ResponseEntity<>(response, response.isSuccess() ? HttpStatus.CREATED : HttpStatus.BAD_REQUEST);
+    public ResponseEntity<String> createCategory(@RequestBody Category category) {
+        try {
+            boolean saved = categoryService.createCategory(category);
+            if (saved) {
+                return ResponseEntity.status(HttpStatus.CREATED).body("Category created successfully.");
+            } else {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Category already exists.");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while creating the category.");
+        }
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+
+    @GetMapping("/{id}/foods")
+    public ResponseEntity<List<Food>> getFoodsByCategoryId(@PathVariable Integer id) {
+        List<Food> foods = categoryService.getFoodsByCategoryId(id);
+        return ResponseEntity.ok(foods);
+    }
+
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse> updateCategory(@PathVariable Integer id, @RequestBody Category category) {
-        ApiResponse response = categoryService.updateCategory(id, category);
-        return new ResponseEntity<>(response, response.isSuccess() ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
+    public ResponseEntity<String> updateCategory(@PathVariable Integer id, @RequestBody Category category) {
+        try {
+            boolean updated = categoryService.updateCategory(id, category);
+            if (updated) {
+                return ResponseEntity.status(HttpStatus.ACCEPTED).body("Category edited successfully.");
+            } else {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Category already exists");
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while updating the category.");
+        }
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse> deleteCategory(@PathVariable Integer id) {
-        ApiResponse response = categoryService.deleteCategory(id);
-        return new ResponseEntity<>(response.isSuccess() ? HttpStatus.OK : HttpStatus.BAD_REQUEST);
+    public ResponseEntity<String> deleteCategory(@PathVariable Integer id) {
+        categoryRepository.deleteById(id);
+        return ResponseEntity.ok("Category deleted successfully.");
     }
+
 }
