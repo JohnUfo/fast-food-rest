@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/categories")
@@ -92,6 +93,25 @@ public class CategoryController {
         food.setDescription(newFood.getDescription());
         food.setCategory(category);
 
+        Food savedFood = foodRepository.save(food);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedFood);
+    }
+
+    @DeleteMapping("/foods/{foodId}")
+    public ResponseEntity<String> deleteFood(@PathVariable Integer foodId) {
+        foodRepository.deleteById(foodId);
+        return ResponseEntity.ok("Food deleted successfully.");
+    }
+
+    @PutMapping("/foods/{foodId}")
+    public ResponseEntity<Food> updateFood(@PathVariable Integer foodId, @RequestBody Food newFood) {
+        Optional<Food> optionalFood = foodRepository.findById(foodId);
+        if (optionalFood.isEmpty())
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+        Food food = optionalFood.get();
+        food.setName(newFood.getName());
+        food.setPrice(newFood.getPrice());
+        food.setDescription(newFood.getDescription());
         Food savedFood = foodRepository.save(food);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedFood);
     }

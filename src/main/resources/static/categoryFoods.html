@@ -67,6 +67,36 @@
     </div>
 </div>
 
+<!-- Modal for Editing Food -->
+<div class="modal fade" id="editFoodModal" tabindex="-1" aria-labelledby="editFoodModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editFoodModalLabel">Edit Food</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editFoodForm">
+                    <input type="hidden" id="editFoodId">
+                    <div class="mb-3">
+                        <label for="editFoodName" class="form-label">Food Name</label>
+                        <input type="text" class="form-control" id="editFoodName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editFoodPrice" class="form-label">Price (USD)</label>
+                        <input type="number" class="form-control" id="editFoodPrice" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="editFoodDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="editFoodDescription" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Food</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
     // Function to get the category ID from the URL
     function getCategoryIdFromUrl() {
@@ -93,6 +123,14 @@
                     foodItem.innerHTML = `
                         <strong>${food.name}</strong> - ${food.price} USD<br>
                         <small>${food.description}</small>
+                        <div class="mt-2">
+                            <button class="btn btn-warning btn-sm" onclick="openEditModal(${food.id}, '${food.name}', ${food.price}, '${food.description}')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteFood(${food.id})">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
                     `;
                     foodList.appendChild(foodItem);
                 });
@@ -149,6 +187,82 @@
             });
     }
 
+    // Function to open edit modal
+    function openEditModal(foodId, foodName, foodPrice, foodDescription) {
+        document.getElementById('editFoodId').value = foodId;
+        document.getElementById('editFoodName').value = foodName;
+        document.getElementById('editFoodPrice').value = foodPrice;
+        document.getElementById('editFoodDescription').value = foodDescription;
+
+        const editModal = new bootstrap.Modal(document.getElementById('editFoodModal'));
+        editModal.show();
+    }
+
+    // Function to handle form submission for editing a food
+    function editFood(event) {
+        event.preventDefault(); // Prevent page refresh
+
+        const foodId = document.getElementById('editFoodId').value;
+        const name = document.getElementById('editFoodName').value;
+        const price = document.getElementById('editFoodPrice').value;
+        const description = document.getElementById('editFoodDescription').value;
+
+        // Create the food object to send to the server
+        const updatedFood = {
+            name: name,
+            price: price,
+            description: description
+        };
+
+        const categoryId = getCategoryIdFromUrl();
+
+        fetch(`/categories/foods/${foodId}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedFood)
+        })
+            .then(response => {
+                if (response.ok) {
+                    // Close the modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('editFoodModal'));
+                    modal.hide();
+
+                    // Reload the food list to reflect the updated food
+                    fetchCategoryFoods(categoryId);
+                } else {
+                    alert('Failed to update food. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error updating food:', error);
+                alert('An error occurred while updating the food.');
+            });
+    }
+
+    // Function to delete food
+    function deleteFood(foodId) {
+        const categoryId = getCategoryIdFromUrl();
+        if (confirm('Are you sure you want to delete this food item?')) {
+            fetch(`/categories/foods/${foodId}`, {
+                method: 'DELETE'
+            })
+                .then(response => {
+                    if (response.ok) {
+                        // Reload the food list to reflect the deletion
+                        fetchCategoryFoods(categoryId);
+                    } else {
+                        alert('Failed to delete food. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting food:', error);
+                    alert('An error occurred while deleting the food.');
+                });
+        }
+    }
+
     // On page load
     document.addEventListener('DOMContentLoaded', () => {
         const categoryId = getCategoryIdFromUrl();
@@ -158,8 +272,9 @@
             alert('Category ID is missing from the URL.');
         }
 
-        // Attach the form submission handler
+        // Attach the form submission handlers
         document.getElementById('addFoodForm').addEventListener('submit', addNewFood);
+        document.getElementById('editFoodForm').addEventListener('submit', editFood);
     });
 </script>
 
