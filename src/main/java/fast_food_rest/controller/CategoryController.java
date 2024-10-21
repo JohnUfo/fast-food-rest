@@ -3,7 +3,9 @@ package fast_food_rest.controller;
 import fast_food_rest.entity.Category;
 import fast_food_rest.entity.Food;
 import fast_food_rest.payload.CategoryDto;
+import fast_food_rest.payload.CategoryFoodDto;
 import fast_food_rest.repository.CategoryRepository;
+import fast_food_rest.repository.FoodRepository;
 import fast_food_rest.service.CategoryService;
 import jakarta.servlet.http.HttpServlet;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -21,6 +24,9 @@ public class CategoryController {
     private CategoryService categoryService; // Assume you have a service layer
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    FoodRepository foodRepository;
 
 
     @GetMapping
@@ -47,13 +53,6 @@ public class CategoryController {
         }
     }
 
-
-    @GetMapping("/{id}/foods")
-    public ResponseEntity<List<Food>> getFoodsByCategoryId(@PathVariable Integer id) {
-        List<Food> foods = categoryService.getFoodsByCategoryId(id);
-        return ResponseEntity.ok(foods);
-    }
-
     @PutMapping("/{id}")
     public ResponseEntity<String> updateCategory(@PathVariable Integer id, @RequestBody Category category) {
         try {
@@ -74,4 +73,26 @@ public class CategoryController {
         return ResponseEntity.ok("Category deleted successfully.");
     }
 
+    @GetMapping("/{categoryId}/foods")
+    public ResponseEntity<?> getFoodsByCategory(@PathVariable Integer categoryId) {
+        Category category = categoryRepository.findById(categoryId).orElseThrow();
+        List<Food> foods = foodRepository.findAllByCategoryId(categoryId);
+        return ResponseEntity.ok(new CategoryFoodDto(category, foods));
+    }
+
+    // Add a new food to a category
+    @PostMapping("/{categoryId}/foods")
+    public ResponseEntity<Food> addFoodToCategory(@PathVariable Integer categoryId, @RequestBody Food newFood) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow();
+
+        Food food = new Food();
+        food.setName(newFood.getName());
+        food.setPrice(newFood.getPrice());
+        food.setDescription(newFood.getDescription());
+        food.setCategory(category);
+
+        Food savedFood = foodRepository.save(food);
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedFood);
+    }
 }

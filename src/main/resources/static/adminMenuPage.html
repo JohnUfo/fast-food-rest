@@ -225,8 +225,18 @@
                     deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
                     deleteButton.onclick = () => openDeleteCategoryModal(category.id);
 
+                    // See Foods button
+                    const seeFoodsButton = document.createElement('button');
+                    seeFoodsButton.className = 'btn btn-info btn-sm icon';
+                    seeFoodsButton.innerHTML = '<i class="fas fa-eye"></i> See category Foods';
+                    seeFoodsButton.onclick = () => {
+                        // Redirect to the page that lists foods of this category
+                        window.location.href = `categoryFoods.html?id=${category.id}`;
+                    };
+
                     categoryItem.appendChild(editButton);
                     categoryItem.appendChild(deleteButton);
+                    categoryItem.appendChild(seeFoodsButton);
                     categoryList.appendChild(categoryItem);
                 });
             })
@@ -235,6 +245,7 @@
                 alert('An error occurred while fetching categories.');
             });
     }
+
 
     // Function to open the delete confirmation modal
     function openDeleteCategoryModal(id) {

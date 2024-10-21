@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Category Foods</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            background: #f8f9fa;
+            color: #212529;
+        }
+
+        .container {
+            margin-top: 30px;
+        }
+
+        .modal .modal-header {
+            background-color: #007bff;
+            color: white;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2 id="categoryName">Category Foods</h2>
+    <ul id="foodList" class="list-group mt-4"></ul>
+
+    <!-- Add Food Button -->
+    <button type="button" class="btn btn-primary mt-4" data-bs-toggle="modal" data-bs-target="#addFoodModal">
+        Add New Food
+    </button>
+
+    <button class="btn btn-secondary mt-4" onclick="window.history.back()">Go Back</button>
+</div>
+
+<!-- Modal for Adding Food -->
+<div class="modal fade" id="addFoodModal" tabindex="-1" aria-labelledby="addFoodModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addFoodModalLabel">Add New Food</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addFoodForm">
+                    <div class="mb-3">
+                        <label for="foodName" class="form-label">Food Name</label>
+                        <input type="text" class="form-control" id="foodName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="foodPrice" class="form-label">Price (USD)</label>
+                        <input type="number" class="form-control" id="foodPrice" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="foodDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="foodDescription" rows="3" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Save Food</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Function to get the category ID from the URL
+    function getCategoryIdFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        return params.get('id');
+    }
+
+    // Function to fetch and display the foods of a category
+    function fetchCategoryFoods(categoryId) {
+        fetch(`/categories/${categoryId}/foods`)
+            .then(response => response.json())
+            .then(data => {
+                // Clear existing foods
+                const foodList = document.getElementById('foodList');
+                foodList.innerHTML = '';
+
+                // Set category name
+                document.getElementById('categoryName').textContent = `Foods in Category: ${data.category.name}`;
+
+                // Loop through foods and display them
+                data.foods.forEach(food => {
+                    const foodItem = document.createElement('li');
+                    foodItem.className = 'list-group-item';
+                    foodItem.innerHTML = `
+                        <strong>${food.name}</strong> - ${food.price} USD<br>
+                        <small>${food.description}</small>
+                    `;
+                    foodList.appendChild(foodItem);
+                });
+            })
+            .catch(error => {
+                console.error('Error fetching foods:', error);
+                alert('An error occurred while fetching the foods.');
+            });
+    }
+
+    // Function to handle form submission for adding a new food
+    function addNewFood(event) {
+        event.preventDefault(); // Prevent page refresh
+
+        const categoryId = getCategoryIdFromUrl();
+        const name = document.getElementById('foodName').value;
+        const price = document.getElementById('foodPrice').value;
+        const description = document.getElementById('foodDescription').value;
+
+        // Create the food object to send to the server
+        const newFood = {
+            name: name,
+            price: price,
+            description: description
+        };
+
+        fetch(`/categories/${categoryId}/foods`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(newFood)
+        })
+            .then(response => {
+                if (response.ok) {
+                    // Clear the form fields after successful submission
+                    document.getElementById('foodName').value = '';
+                    document.getElementById('foodPrice').value = '';
+                    document.getElementById('foodDescription').value = '';
+
+                    // Close the modal
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('addFoodModal'));
+                    modal.hide();
+
+                    // Reload the food list to include the new food
+                    fetchCategoryFoods(categoryId);
+                } else {
+                    alert('Failed to add food. Please try again.');
+                }
+            })
+            .catch(error => {
+                console.error('Error adding new food:', error);
+                alert('An error occurred while adding the food.');
+            });
+    }
+
+    // On page load
+    document.addEventListener('DOMContentLoaded', () => {
+        const categoryId = getCategoryIdFromUrl();
+        if (categoryId) {
+            fetchCategoryFoods(categoryId);
+        } else {
+            alert('Category ID is missing from the URL.');
+        }
+
+        // Attach the form submission handler
+        document.getElementById('addFoodForm').addEventListener('submit', addNewFood);
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>
