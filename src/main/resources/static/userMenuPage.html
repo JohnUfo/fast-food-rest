@@ -13,10 +13,77 @@
 <div class="container">
     <h2 class="text-center">User Menu</h2>
     <button class="btn btn-primary" onclick="window.location.href='basket.html'">Your Basket</button>
-    <button class="btn btn-primary" onclick="window.location.href='categories.html'">View Categories</button>
     <button class="btn btn-danger" onclick="logout()">Logout</button>
+
+    <h3 class="mt-4">Categories</h3>
+    <div class="row" id="categoryRow"></div> <!-- Row to hold category names -->
+
+    <!-- Modal to display foods of a category -->
+    <div class="modal fade" id="foodsModal" tabindex="-1" aria-labelledby="foodsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="foodsModalLabel">Foods in Category</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <ul id="foodList" class="list-group"></ul> <!-- List of foods -->
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
+<script>
+    // Function to fetch categories and display them in a row
+    function fetchCategories() {
+        fetch('/categories')
+            .then(response => response.json())
+            .then(categories => {
+                const categoryRow = document.getElementById('categoryRow');
+                categories.forEach(category => {
+                    const categoryCol = document.createElement('div');
+                    categoryCol.className = 'col-md-3'; // Adjust size based on your layout
+                    categoryCol.innerHTML = `<button class="btn btn-outline-primary w-100 mb-3" onclick="showCategoryFoods(${category.id}, '${category.name}')">${category.name}</button>`;
+                    categoryRow.appendChild(categoryCol);
+                });
+            })
+            .catch(error => console.error('Error fetching categories:', error));
+    }
+
+    // Function to fetch and display foods of a selected category in the modal
+    function showCategoryFoods(categoryId, categoryName) {
+        // Set the modal title with the category name
+        document.getElementById('foodsModalLabel').innerText = `Foods in Category: ${categoryName}`;
+
+        fetch(`/categories/${categoryId}/foods`)
+            .then(response => response.json())
+            .then(data => {
+                const foodList = document.getElementById('foodList');
+                foodList.innerHTML = ''; // Clear previous food items
+
+                // Data contains both category and foods as part of CategoryFoodDto
+                const foods = data.foods;
+
+                foods.forEach(food => {
+                    const foodItem = document.createElement('li');
+                    foodItem.className = 'list-group-item';
+                    foodItem.innerHTML = `<strong>${food.name}</strong> - $${food.price}<br><small>${food.description}</small>`;
+                    foodList.appendChild(foodItem);
+                });
+
+                // Show the modal
+                const modal = new bootstrap.Modal(document.getElementById('foodsModal'));
+                modal.show();
+            })
+            .catch(error => console.error('Error fetching foods:', error));
+    }
+
+    // Fetch categories on page load
+    document.addEventListener('DOMContentLoaded', fetchCategories);
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
