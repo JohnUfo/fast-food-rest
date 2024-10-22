@@ -223,7 +223,7 @@
                     const deleteButton = document.createElement('button');
                     deleteButton.className = 'btn btn-danger btn-sm icon';
                     deleteButton.innerHTML = '<i class="fas fa-trash"></i>';
-                    deleteButton.onclick = () => openDeleteCategoryModal(category.id);
+                    deleteButton.onclick = () => openDeleteCategoryModal(category.id)
 
                     // See Foods button
                     const seeFoodsButton = document.createElement('button');
@@ -260,6 +260,13 @@
     // Function to create a new category
     function createCategory() {
         const categoryName = document.getElementById('newCategoryName').value;
+
+        // Basic validation to ensure category name is not empty
+        if (!categoryName.trim()) {
+            alert('Please enter a valid category name.');
+            return;
+        }
+
         fetch('/categories', {
             method: 'POST',
             headers: {
@@ -269,16 +276,36 @@
         })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.message || 'An error occurred while creating the category.');
+                    });
                 }
-                document.getElementById('newCategoryName').value = ''; // Clear input
-                fetchCategories(); // Refresh categories
+
+                // Check for an empty response body
+                if (response.status === 201) {
+                    return response.json().catch(() => {
+                        // If there's no body, return a placeholder
+                        return { message: 'Category created successfully' };
+                    });
+                }
+            })
+            .then(data => {
+                document.getElementById('newCategoryName').value = ''; // Clear input field
+
+                // Hide the modal after successful creation
+                const createCategoryModal = bootstrap.Modal.getInstance(document.getElementById('createCategoryModal'));
+                createCategoryModal.hide();
+
+                // Refresh the category list
+                fetchCategories();
             })
             .catch(error => {
                 console.error('Error creating category:', error);
-                alert('An error occurred while creating the category.');
+                alert('An error occurred while creating the category: ' + error.message);
             });
+
     }
+
 
     // Function to open the edit category modal
     function openEditCategoryModal(id, name) {
@@ -305,12 +332,17 @@
                     throw new Error('Network response was not ok');
                 }
                 fetchCategories(); // Refresh categories
+
+                // Hide the modal after updating
+                const editCategoryModal = bootstrap.Modal.getInstance(document.getElementById('editCategoryModal'));
+                editCategoryModal.hide();
             })
             .catch(error => {
                 console.error('Error updating category:', error);
                 alert('An error occurred while updating the category.');
             });
     }
+
 
     // Function to delete a category
     function deleteCategory(id) {
@@ -321,6 +353,11 @@
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
+
+                // Close the delete confirmation modal
+                const deleteCategoryModal = bootstrap.Modal.getInstance(document.getElementById('deleteCategoryModal'));
+                deleteCategoryModal.hide();
+
                 fetchCategories(); // Refresh categories
             })
             .catch(error => {

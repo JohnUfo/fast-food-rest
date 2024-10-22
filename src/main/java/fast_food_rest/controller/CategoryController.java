@@ -41,21 +41,23 @@ public class CategoryController {
     }
 
     @PostMapping
-    public ResponseEntity<String> createCategory(@RequestBody Category category) {
+    public ResponseEntity<?> createCategory(@RequestBody Category category) {
+        if(category.getName().isBlank()){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+        }
         try {
-            boolean saved = categoryService.createCategory(category);
-            if (saved) {
-                return ResponseEntity.status(HttpStatus.CREATED).body("Category created successfully.");
-            } else {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("Category already exists.");
-            }
+            Category savedCategory = categoryService.createCategory(category);
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory); // Return the created category in the response body
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while creating the category.");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("An error occurred while creating the category.");
         }
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<String> updateCategory(@PathVariable Integer id, @RequestBody Category category) {
+        if(category.getName().isBlank()){
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Give reliable name.");
+        }
         try {
             boolean updated = categoryService.updateCategory(id, category);
             if (updated) {

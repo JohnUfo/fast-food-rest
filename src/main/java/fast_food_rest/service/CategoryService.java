@@ -27,13 +27,12 @@ public class CategoryService {
                 .collect(Collectors.toList());
     }
 
-    public boolean createCategory(Category category) {
+    public Category createCategory(Category category) {
         boolean existsByName = categoryRepository.existsByName(category.getName());
         if (existsByName) {
-            return false;
+            return null;
         }
-        categoryRepository.save(category);
-        return true;
+        return categoryRepository.save(category);
     }
 
     public List<Food> getFoodsByCategoryId(Integer categoryId) {
