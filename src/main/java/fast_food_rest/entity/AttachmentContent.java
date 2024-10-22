@@ -1,11 +1,8 @@
 package fast_food_rest.entity;
 
-
+import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import fast_food_rest.entity.template.AbsEntity;
 
 @EqualsAndHashCode(callSuper = true)
@@ -13,10 +10,13 @@ import fast_food_rest.entity.template.AbsEntity;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class AttachmentContent extends AbsEntity {
 
+    @Lob
+    @Basic(fetch = FetchType.LAZY)
     private byte[] bytes;
 
-    @OneToOne
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private Attachment attachment;
 }
