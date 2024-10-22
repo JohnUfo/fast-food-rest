@@ -1,18 +1,25 @@
 package fast_food_rest.controller;
 
+import fast_food_rest.entity.Attachment;
+import fast_food_rest.entity.AttachmentContent;
 import fast_food_rest.entity.Category;
 import fast_food_rest.entity.Food;
 import fast_food_rest.payload.CategoryDto;
 import fast_food_rest.payload.CategoryFoodDto;
+import fast_food_rest.payload.FoodDto;
+import fast_food_rest.repository.AttachmentContentRepository;
+import fast_food_rest.repository.AttachmentRepository;
 import fast_food_rest.repository.CategoryRepository;
 import fast_food_rest.repository.FoodRepository;
 import fast_food_rest.service.CategoryService;
+import io.jsonwebtoken.io.IOException;
 import jakarta.servlet.http.HttpServlet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -23,12 +30,19 @@ import java.util.Optional;
 public class CategoryController {
 
     @Autowired
-    private CategoryService categoryService; // Assume you have a service layer
+    private CategoryService categoryService;
+
     @Autowired
     private CategoryRepository categoryRepository;
 
     @Autowired
+    AttachmentRepository attachmentRepository;
+
+    @Autowired
     FoodRepository foodRepository;
+
+    @Autowired
+    AttachmentContentRepository attachmentContentRepository;
 
 
     @GetMapping
@@ -85,19 +99,44 @@ public class CategoryController {
     }
 
     @PostMapping("/{categoryId}/foods")
-    public ResponseEntity<Food> addFoodToCategory(@PathVariable Integer categoryId, @RequestBody Food newFood) {
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow();
+    public ResponseEntity<?> addFood(@ModelAttribute FoodDto foodDto,@PathVariable Integer categoryId) throws IOException, java.io.IOException {
 
+        MultipartFile file = foodDto.getFile();
+        Attachment attachment = null;
+
+        if (file != null && !file.isEmpty()) {
+            attachment = new Attachment();
+            attachment.setFileOriginalName(file.getOriginalFilename());
+            attachment.setSize(file.getSize());
+            attachment.setContentType(file.getContentType());
+
+            // Generate a unique file name (you can use UUID, timestamp, etc.)
+            attachment.setName("uniqueFileName_" + System.currentTimeMillis());
+
+            // Save the Attachment entity first
+            attachment = attachmentRepository.save(attachment);
+
+            // Save the file bytes in AttachmentContent
+            AttachmentContent attachmentContent = new AttachmentContent();
+            attachmentContent.setBytes(file.getBytes());
+            attachmentContent.setAttachment(attachment);
+
+            attachmentContentRepository.save(attachmentContent);
+        }
+
+        // Step 2: Create and save the Food entity
         Food food = new Food();
-        food.setName(newFood.getName());
-        food.setPrice(newFood.getPrice());
-        food.setDescription(newFood.getDescription());
-        food.setCategory(category);
+        food.setName(foodDto.getName());
+        food.setPrice(foodDto.getPrice());
+        food.setDescription(foodDto.getDescription());
+        food.setFoodPhoto(attachment);
+        food.setCategory(categoryRepository.findById(categoryId).orElseThrow());
 
-        Food savedFood = foodRepository.save(food);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedFood);
+        foodRepository.save(food);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body("Food added successfully");
     }
+
 
     @DeleteMapping("/foods/{foodId}")
     public ResponseEntity<String> deleteFood(@PathVariable Integer foodId) {

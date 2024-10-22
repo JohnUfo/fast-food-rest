@@ -47,7 +47,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="addFoodForm">
+                <form id="addFoodForm" enctype="multipart/form-data">
                     <div class="mb-3">
                         <label for="foodName" class="form-label">Food Name</label>
                         <input type="text" class="form-control" id="foodName" required>
@@ -60,12 +60,17 @@
                         <label for="foodDescription" class="form-label">Description</label>
                         <textarea class="form-control" id="foodDescription" rows="3" required></textarea>
                     </div>
+                    <div class="mb-3">
+                        <label for="foodPhoto" class="form-label">Upload Photo</label>
+                        <input type="file" class="form-control" id="foodPhoto" accept="image/*" required>
+                    </div>
                     <button type="submit" class="btn btn-primary">Save Food</button>
                 </form>
             </div>
         </div>
     </div>
 </div>
+
 
 <!-- Modal for Editing Food -->
 <div class="modal fade" id="editFoodModal" tabindex="-1" aria-labelledby="editFoodModalLabel" aria-hidden="true">
@@ -149,20 +154,18 @@
         const name = document.getElementById('foodName').value;
         const price = document.getElementById('foodPrice').value;
         const description = document.getElementById('foodDescription').value;
+        const photo = document.getElementById('foodPhoto').files[0];
 
-        // Create the food object to send to the server
-        const newFood = {
-            name: name,
-            price: price,
-            description: description
-        };
+        // Create FormData to handle the file and other form data
+        const formData = new FormData();
+        formData.append('name', name);
+        formData.append('price', price);
+        formData.append('description', description);
+        formData.append('photo', photo); // Append the file
 
         fetch(`/categories/${categoryId}/foods`, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(newFood)
+            body: formData // Use FormData instead of JSON
         })
             .then(response => {
                 if (response.ok) {
@@ -170,6 +173,7 @@
                     document.getElementById('foodName').value = '';
                     document.getElementById('foodPrice').value = '';
                     document.getElementById('foodDescription').value = '';
+                    document.getElementById('foodPhoto').value = ''; // Clear file input
 
                     // Close the modal
                     const modal = bootstrap.Modal.getInstance(document.getElementById('addFoodModal'));
@@ -186,6 +190,7 @@
                 alert('An error occurred while adding the food.');
             });
     }
+
 
     // Function to open edit modal
     function openEditModal(foodId, foodName, foodPrice, foodDescription) {
