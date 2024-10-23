@@ -14,7 +14,7 @@ import lombok.*;
 @ToString(exclude = "category")  // Prevent recursion in toString
 public class Food extends AbsEntity {
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     private Attachment file;
 
     @Column(nullable = false, unique = true)
