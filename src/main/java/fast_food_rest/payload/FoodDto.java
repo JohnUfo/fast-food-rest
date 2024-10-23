@@ -12,5 +12,4 @@ public class FoodDto {
     private String name;
     private double price;
     private String description;
-    private MultipartFile file;
 }

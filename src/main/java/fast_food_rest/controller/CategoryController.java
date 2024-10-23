@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "http://localhost:8080")
 @RequestMapping("/categories")
 public class CategoryController {
 
@@ -57,7 +58,7 @@ public class CategoryController {
 
     @PostMapping
     public ResponseEntity<?> createCategory(@RequestBody Category category) {
-        if(category.getName().isBlank()){
+        if (category.getName().isBlank()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         }
         try {
@@ -69,8 +70,8 @@ public class CategoryController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<String> updateCategory(@PathVariable Integer id, @RequestBody Category category) {
-        if(category.getName().isBlank()){
+    public ResponseEntity<String> updateCategory(@PathVariable Long id, @RequestBody Category category) {
+        if (category.getName().isBlank()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Give reliable name.");
         }
         try {
@@ -86,22 +87,22 @@ public class CategoryController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteCategory(@PathVariable Integer id) {
+    public ResponseEntity<String> deleteCategory(@PathVariable Long id) {
         categoryRepository.deleteById(id);
         return ResponseEntity.ok("Category deleted successfully.");
     }
 
     @GetMapping("/{categoryId}/foods")
-    public ResponseEntity<?> getFoodsByCategory(@PathVariable Integer categoryId) {
-        Category category = categoryRepository.findById(categoryId).orElseThrow();
-        List<Food> foods = foodRepository.findAllByCategoryId(categoryId);
-        return ResponseEntity.ok(new CategoryFoodDto(category, foods));
+    public ResponseEntity<?> getFoodsByCategory(@PathVariable Long categoryId) {
+        Category category = categoryRepository.findById(categoryId)
+                .orElseThrow(null);
+
+        return ResponseEntity.ok(new CategoryFoodDto(category, category.getFoods()));
     }
 
     @PostMapping("/{categoryId}/foods")
-    public ResponseEntity<?> addFood(@ModelAttribute FoodDto foodDto,@PathVariable Integer categoryId) throws IOException, java.io.IOException {
+    public ResponseEntity<?> addFood(@RequestParam("file") MultipartFile file, @ModelAttribute FoodDto foodDto,@PathVariable Long categoryId) throws IOException, java.io.IOException {
 
-        MultipartFile file = foodDto.getFile();
         Attachment attachment = null;
 
         if (file != null && !file.isEmpty()) {
@@ -129,7 +130,7 @@ public class CategoryController {
         food.setName(foodDto.getName());
         food.setPrice(foodDto.getPrice());
         food.setDescription(foodDto.getDescription());
-        food.setFoodPhoto(attachment);
+        food.setFile(attachment);
         food.setCategory(categoryRepository.findById(categoryId).orElseThrow());
 
         foodRepository.save(food);
@@ -139,13 +140,13 @@ public class CategoryController {
 
 
     @DeleteMapping("/foods/{foodId}")
-    public ResponseEntity<String> deleteFood(@PathVariable Integer foodId) {
+    public ResponseEntity<String> deleteFood(@PathVariable Long foodId) {
         foodRepository.deleteById(foodId);
         return ResponseEntity.ok("Food deleted successfully.");
     }
 
     @PutMapping("/foods/{foodId}")
-    public ResponseEntity<Food> updateFood(@PathVariable Integer foodId, @RequestBody Food newFood) {
+    public ResponseEntity<Food> updateFood(@PathVariable Long foodId, @RequestBody Food newFood) {
         Optional<Food> optionalFood = foodRepository.findById(foodId);
         if (optionalFood.isEmpty())
             return ResponseEntity.status(HttpStatus.CONFLICT).body(null);

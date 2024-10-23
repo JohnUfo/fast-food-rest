@@ -6,5 +6,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.bind.annotation.RestController;
 
 @Repository
-public interface AttachmentRepository extends JpaRepository<Attachment,Integer> {
+public interface AttachmentRepository extends JpaRepository<Attachment,Long> {
+    Attachment getAttachmentById(Attachment foodPhoto);
 }

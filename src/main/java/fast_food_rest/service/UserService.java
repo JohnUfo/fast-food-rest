@@ -24,7 +24,7 @@ public class UserService {
         return userRepository.findAll();
     }
 
-    public void updateUserRoles(Integer userId, Set<String> roleNames) {
+    public void updateUserRoles(Long userId, Set<String> roleNames) {
         User user = userRepository.findById(userId).orElse(null);
 
         Set<Role> roles = roleNames.stream()
@@ -37,7 +37,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public void removeRolesFromUser(Integer userId, List<String> roleNames) {
+    public void removeRolesFromUser(Long userId, List<String> roleNames) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 

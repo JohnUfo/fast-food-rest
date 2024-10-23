@@ -17,7 +17,7 @@ public class FoodService {
     @Autowired
     CategoryRepository categoryRepository;
 
-    public ApiResponse updateFood(Integer id, Food updatedFood) {
+    public ApiResponse updateFood(Long id, Food updatedFood) {
         boolean existsById = foodRepository.existsById(id);
         if (!existsById) {
             return new ApiResponse("Food is not exist", false);
@@ -31,7 +31,7 @@ public class FoodService {
         return new ApiResponse("Food updated successfully", true);
     }
 
-    public boolean addFood(String foodName, double foodPrice, String foodDescription, Integer categoryId) {
+    public boolean addFood(String foodName, double foodPrice, String foodDescription, Long categoryId) {
 
         boolean exists = foodRepository.existsByName(foodName);
         if (exists) {

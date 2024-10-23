@@ -13,7 +13,7 @@ import fast_food_rest.entity.template.AbsEntity;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class AttachmentContent extends AbsEntity {
 
-    @Lob
+
     @Basic(fetch = FetchType.LAZY)
     private byte[] bytes;
 

@@ -35,11 +35,11 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
-    public List<Food> getFoodsByCategoryId(Integer categoryId) {
+    public List<Food> getFoodsByCategoryId(Long categoryId) {
         return foodRepository.findAllByCategoryId(categoryId);
     }
 
-    public boolean updateCategory(Integer id, Category updatedCategory) {
+    public boolean updateCategory(Long id, Category updatedCategory) {
         Optional<Category> optionalCategory = categoryRepository.findById(id);
         if (optionalCategory.isEmpty()) {
             return false;

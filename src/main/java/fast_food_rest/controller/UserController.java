@@ -29,13 +29,13 @@ public class UserController {
 
     @PutMapping("/{userId}/roles")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> updateUserRoles(@PathVariable Integer userId, @RequestBody Set<String> roles) {
+    public ResponseEntity<?> updateUserRoles(@PathVariable Long userId, @RequestBody Set<String> roles) {
         userService.updateUserRoles(userId, roles);
         return new ResponseEntity<>(new ApiResponse("User roles updated successfully", true), HttpStatus.OK);
     }
 
     @DeleteMapping("/{userId}/roles")
-    public ResponseEntity<?> removeRoleFromUser(@PathVariable Integer userId, @RequestBody List<String> roles) {
+    public ResponseEntity<?> removeRoleFromUser(@PathVariable Long userId, @RequestBody List<String> roles) {
         try {
             userService.removeRolesFromUser(userId, roles);
             return ResponseEntity.ok().body(Collections.singletonMap("message", "Role removed successfully."));
