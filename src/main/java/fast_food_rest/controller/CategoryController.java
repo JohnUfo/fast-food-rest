@@ -13,6 +13,7 @@ import fast_food_rest.repository.CategoryRepository;
 import fast_food_rest.repository.FoodRepository;
 import fast_food_rest.service.CategoryService;
 import io.jsonwebtoken.io.IOException;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -82,16 +83,29 @@ public class CategoryController {
         }
     }
 
+    @Transactional
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCategory(@PathVariable Long id) {
+        Optional<Category> optionalCategory = categoryRepository.findById(id);
+        for (Food food : optionalCategory.get().getFoods()) {
+
+            if (food.getFile() != null) {
+                Attachment attachment = food.getFile();
+                attachmentContentRepository.deleteByAttachment(attachment);
+                attachmentRepository.delete(attachment);
+            }
+            foodRepository.delete(food);
+
+            foodRepository.deleteById(food.getId());
+        }
         categoryRepository.deleteById(id);
+
         return ResponseEntity.ok("Category deleted successfully.");
     }
 
     @GetMapping("/{categoryId}/foods")
     public ResponseEntity<?> getFoodsByCategory(@PathVariable Long categoryId) {
-        Category category = categoryRepository.findById(categoryId)
-                .orElseThrow(null);
+        Category category = categoryRepository.findById(categoryId).orElseThrow(null);
 
         return ResponseEntity.ok(new CategoryFoodDto(category, category.getFoods()));
     }
@@ -134,17 +148,24 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.CREATED).body("Food added successfully");
     }
 
-
+    @Transactional
     @DeleteMapping("/foods/{foodId}")
     public ResponseEntity<String> deleteFood(@PathVariable Long foodId) {
+        Food food = foodRepository.findById(foodId).orElseThrow();
+
+        if (food.getFile() != null) {
+            Attachment attachment = food.getFile();
+            attachmentContentRepository.deleteByAttachment(attachment);
+            attachmentRepository.delete(attachment);
+        }
+        foodRepository.delete(food);
+
         foodRepository.deleteById(foodId);
         return ResponseEntity.ok("Food deleted successfully.");
     }
 
     @PutMapping("/foods/{foodId}")
-    public ResponseEntity<Food> updateFood(@PathVariable Long foodId,
-                                           @RequestParam("file") MultipartFile file,
-                                           @ModelAttribute FoodDto newFood) throws java.io.IOException {
+    public ResponseEntity<Food> updateFood(@PathVariable Long foodId, @RequestParam("file") MultipartFile file, @ModelAttribute FoodDto newFood) throws java.io.IOException {
         Optional<Food> optionalFood = foodRepository.findById(foodId);
         if (optionalFood.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
