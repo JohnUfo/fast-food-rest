@@ -13,20 +13,16 @@ import fast_food_rest.repository.CategoryRepository;
 import fast_food_rest.repository.FoodRepository;
 import fast_food_rest.service.CategoryService;
 import io.jsonwebtoken.io.IOException;
-import jakarta.servlet.http.HttpServlet;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @RestController
-@CrossOrigin(origins = "http://localhost:8080")
 @RequestMapping("/categories")
 public class CategoryController {
 
@@ -101,7 +97,7 @@ public class CategoryController {
     }
 
     @PostMapping("/{categoryId}/foods")
-    public ResponseEntity<?> addFood(@RequestParam("file") MultipartFile file, @ModelAttribute FoodDto foodDto,@PathVariable Long categoryId) throws IOException, java.io.IOException {
+    public ResponseEntity<?> addFood(@RequestParam("file") MultipartFile file, @ModelAttribute FoodDto foodDto, @PathVariable Long categoryId) throws IOException, java.io.IOException {
 
         Attachment attachment = null;
 
@@ -146,15 +142,37 @@ public class CategoryController {
     }
 
     @PutMapping("/foods/{foodId}")
-    public ResponseEntity<Food> updateFood(@PathVariable Long foodId, @RequestBody Food newFood) {
+    public ResponseEntity<Food> updateFood(@PathVariable Long foodId,
+                                           @RequestParam("file") MultipartFile file,
+                                           @ModelAttribute FoodDto newFood) throws java.io.IOException {
         Optional<Food> optionalFood = foodRepository.findById(foodId);
-        if (optionalFood.isEmpty())
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+        if (optionalFood.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+
         Food food = optionalFood.get();
         food.setName(newFood.getName());
         food.setPrice(newFood.getPrice());
         food.setDescription(newFood.getDescription());
+
+        if (file != null && !file.isEmpty()) {
+
+            Attachment attachment = food.getFile();
+            attachment.setFileOriginalName(file.getOriginalFilename());
+            attachment.setSize(file.getSize());
+            attachment.setContentType(file.getContentType());
+            attachment.setName("uniqueFileName_" + System.currentTimeMillis());
+
+            attachment = attachmentRepository.save(attachment);
+
+            Optional<AttachmentContent> attachmentContent = attachmentContentRepository.findByAttachmentId(attachment.getId());
+            attachmentContent.get().setBytes(file.getBytes());
+            attachmentContent.get().setAttachment(attachment);
+            attachmentContentRepository.save(attachmentContent.get());
+        }
+
         Food savedFood = foodRepository.save(food);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedFood);
+        return ResponseEntity.status(HttpStatus.OK).body(savedFood);
     }
+
 }
