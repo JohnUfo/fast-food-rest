@@ -35,11 +35,13 @@ public class CategoryService {
         return categoryRepository.save(category);
     }
 
-    public List<Food> getFoodsByCategoryId(Long categoryId) {
-        return foodRepository.findAllByCategoryId(categoryId);
-    }
 
     public boolean updateCategory(Long id, Category updatedCategory) {
+        boolean existsByName = categoryRepository.existsByName(updatedCategory.getName());
+        if (existsByName) {
+            return false;
+        }
+
         Optional<Category> optionalCategory = categoryRepository.findById(id);
         if (optionalCategory.isEmpty()) {
             return false;

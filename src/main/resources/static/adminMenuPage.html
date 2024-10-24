@@ -126,8 +126,12 @@
             <div class="card">
                 <div class="card-body">
                     <ul id="categoryList" class="list-group mb-4"></ul>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCategoryModal"><i class="fas fa-plus"></i> Add New Category</button>
-                    <button class="btn btn-info mt-2" onclick="location.href='userList.html'"><i class="fas fa-users"></i> Manage Users</button>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCategoryModal"><i
+                            class="fas fa-plus"></i> Add New Category
+                    </button>
+                    <button class="btn btn-info mt-2" onclick="location.href='userList.html'"><i
+                            class="fas fa-users"></i> Manage Users
+                    </button>
                 </div>
             </div>
         </div>
@@ -135,7 +139,8 @@
 </div>
 
 <!-- Modal for Creating a New Category -->
-<div class="modal fade" id="createCategoryModal" tabindex="-1" aria-labelledby="createCategoryModalLabel" aria-hidden="true">
+<div class="modal fade" id="createCategoryModal" tabindex="-1" aria-labelledby="createCategoryModalLabel"
+     aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -154,7 +159,8 @@
 </div>
 
 <!-- Modal for Editing a Category -->
-<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel" aria-hidden="true">
+<div class="modal fade" id="editCategoryModal" tabindex="-1" aria-labelledby="editCategoryModalLabel"
+     aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -174,7 +180,8 @@
 </div>
 
 <!-- Modal for Deleting a Category -->
-<div class="modal fade confirmation-modal" id="deleteCategoryModal" tabindex="-1" aria-labelledby="deleteCategoryModalLabel" aria-hidden="true">
+<div class="modal fade confirmation-modal" id="deleteCategoryModal" tabindex="-1"
+     aria-labelledby="deleteCategoryModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -249,11 +256,10 @@
 
     // Function to open the delete confirmation modal
     function openDeleteCategoryModal(id) {
-        categoryToDelete = id; // Store the category ID to delete
+        categoryToDelete = id;
         const deleteCategoryModal = new bootstrap.Modal(document.getElementById('deleteCategoryModal'));
         deleteCategoryModal.show();
 
-        // Set the click event for the confirm button
         document.getElementById('confirmDeleteButton').onclick = () => deleteCategory(categoryToDelete);
     }
 
@@ -261,7 +267,6 @@
     function createCategory() {
         const categoryName = document.getElementById('newCategoryName').value;
 
-        // Basic validation to ensure category name is not empty
         if (!categoryName.trim()) {
             alert('Please enter a valid category name.');
             return;
@@ -272,38 +277,29 @@
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ name: categoryName })
+            body: JSON.stringify({name: categoryName})
         })
             .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errorData => {
-                        throw new Error(errorData.message || 'An error occurred while creating the category.');
-                    });
-                }
-
-                // Check for an empty response body
-                if (response.status === 201) {
-                    return response.json().catch(() => {
-                        // If there's no body, return a placeholder
-                        return { message: 'Category created successfully' };
-                    });
-                }
+                return response.text().then(bodyText => ({status: response.status, body: bodyText}));
             })
-            .then(data => {
-                document.getElementById('newCategoryName').value = ''; // Clear input field
+            .then(({status, body}) => {
+                if (status === 201) {
+                    document.getElementById('newCategoryName').value = '';
 
-                // Hide the modal after successful creation
-                const createCategoryModal = bootstrap.Modal.getInstance(document.getElementById('createCategoryModal'));
-                createCategoryModal.hide();
+                    const createCategoryModal = bootstrap.Modal.getInstance(document.getElementById('createCategoryModal'));
+                    createCategoryModal.hide();
 
-                // Refresh the category list
-                fetchCategories();
+                    fetchCategories();
+                } else if (status === 409) {
+                    alert(body || 'Category already exists.');
+                } else {
+                    alert(body || 'An error occurred while creating the category.');
+                }
             })
             .catch(error => {
                 console.error('Error creating category:', error);
                 alert('An error occurred while creating the category: ' + error.message);
             });
-
     }
 
 
@@ -325,17 +321,21 @@
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ name: categoryName })
+            body: JSON.stringify({name: categoryName})
         })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Network response was not ok');
-                }
-                fetchCategories(); // Refresh categories
+            .then(response => response.text().then(bodyText => ({status: response.status, body: bodyText})))
+            .then(({status, body}) => {
+                if (status === 202) {
+                    fetchCategories();
 
-                // Hide the modal after updating
-                const editCategoryModal = bootstrap.Modal.getInstance(document.getElementById('editCategoryModal'));
-                editCategoryModal.hide();
+                    const editCategoryModal = bootstrap.Modal.getInstance(document.getElementById('editCategoryModal'));
+                    editCategoryModal.hide();
+
+                } else if (status === 409) {
+                    alert(body);
+                } else {
+                    alert(body || 'An error occurred while updating the category.');
+                }
             })
             .catch(error => {
                 console.error('Error updating category:', error);
@@ -354,11 +354,10 @@
                     throw new Error('Network response was not ok');
                 }
 
-                // Close the delete confirmation modal
                 const deleteCategoryModal = bootstrap.Modal.getInstance(document.getElementById('deleteCategoryModal'));
                 deleteCategoryModal.hide();
 
-                fetchCategories(); // Refresh categories
+                fetchCategories();
             })
             .catch(error => {
                 console.error('Error deleting category:', error);
@@ -366,7 +365,7 @@
             });
     }
 
-    // Fetch categories on page load
+
     document.addEventListener('DOMContentLoaded', fetchCategories);
 </script>
 
@@ -374,7 +373,7 @@
     <p>&copy; 2024 Admin Panel</p>
 </footer>
 
-<!-- Bootstrap JS and dependencies -->
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.min.js"></script>

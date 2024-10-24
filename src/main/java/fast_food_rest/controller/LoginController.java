@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -47,7 +48,6 @@ public class LoginController {
                                                      @RequestParam String password) {
         Map<String, Object> response = new HashMap<>();
         try {
-
             Authentication authenticate = authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(email, password)
             );
@@ -64,10 +64,14 @@ public class LoginController {
             response.put("roles", roleNames);
             return new ResponseEntity<>(response, HttpStatus.OK);
 
-        } catch (Exception e) {
+        } catch (BadCredentialsException e) {
             response.put("success", false);
             response.put("message", "Invalid email or password");
             return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "An error occurred during login");
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

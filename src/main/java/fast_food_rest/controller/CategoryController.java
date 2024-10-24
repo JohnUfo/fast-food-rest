@@ -60,7 +60,8 @@ public class CategoryController {
         }
         try {
             Category savedCategory = categoryService.createCategory(category);
-            return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory); // Return the created category in the response body
+            if (savedCategory != null) return ResponseEntity.status(HttpStatus.CREATED).body(savedCategory);
+            else return ResponseEntity.status(HttpStatus.CONFLICT).body("This category is already exist");
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("An error occurred while creating the category.");
         }
@@ -71,33 +72,16 @@ public class CategoryController {
         if (category.getName().isBlank()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body("Give reliable name.");
         }
-        try {
-            boolean updated = categoryService.updateCategory(id, category);
-            if (updated) {
-                return ResponseEntity.status(HttpStatus.ACCEPTED).body("Category edited successfully.");
-            } else {
-                return ResponseEntity.status(HttpStatus.CONFLICT).body("Category already exists");
-            }
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while updating the category.");
+        boolean updated = categoryService.updateCategory(id, category);
+        if (updated) {
+            return ResponseEntity.status(HttpStatus.ACCEPTED).body("Category edited successfully.");
+        } else {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Category already exists");
         }
     }
 
-    @Transactional
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCategory(@PathVariable Long id) {
-        Optional<Category> optionalCategory = categoryRepository.findById(id);
-        for (Food food : optionalCategory.get().getFoods()) {
-
-            if (food.getFile() != null) {
-                Attachment attachment = food.getFile();
-                attachmentContentRepository.deleteByAttachment(attachment);
-                attachmentRepository.delete(attachment);
-            }
-            foodRepository.delete(food);
-
-            foodRepository.deleteById(food.getId());
-        }
         categoryRepository.deleteById(id);
 
         return ResponseEntity.ok("Category deleted successfully.");
@@ -120,22 +104,15 @@ public class CategoryController {
             attachment.setFileOriginalName(file.getOriginalFilename());
             attachment.setSize(file.getSize());
             attachment.setContentType(file.getContentType());
-
-            // Generate a unique file name (you can use UUID, timestamp, etc.)
             attachment.setName("uniqueFileName_" + System.currentTimeMillis());
 
-            // Save the Attachment entity first
-
-            // Save the file bytes in AttachmentContent
             AttachmentContent attachmentContent = new AttachmentContent();
             attachmentContent.setBytes(file.getBytes());
             attachmentContent.setAttachment(attachment);
             attachment.setAttachmentContent(attachmentContent);
-
             attachment = attachmentRepository.save(attachment);
         }
 
-        // Step 2: Create and save the Food entity
         Food food = new Food();
         food.setName(foodDto.getName());
         food.setPrice(foodDto.getPrice());
@@ -148,18 +125,8 @@ public class CategoryController {
         return ResponseEntity.status(HttpStatus.CREATED).body("Food added successfully");
     }
 
-    @Transactional
     @DeleteMapping("/foods/{foodId}")
     public ResponseEntity<String> deleteFood(@PathVariable Long foodId) {
-//        Food food = foodRepository.findById(foodId).orElseThrow();
-//
-//        if (food.getFile() != null) {
-//            Attachment attachment = food.getFile();
-//            attachmentContentRepository.deleteByAttachment(attachment);
-//            attachmentRepository.delete(attachment);
-//        }
-//        foodRepository.delete(food);
-
         foodRepository.deleteById(foodId);
         return ResponseEntity.ok("Food deleted successfully.");
     }
