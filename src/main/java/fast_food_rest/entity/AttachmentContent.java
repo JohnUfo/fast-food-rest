@@ -17,6 +17,6 @@ public class AttachmentContent extends AbsEntity {
     @Basic(fetch = FetchType.LAZY)
     private byte[] bytes;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToOne(mappedBy = "attachmentContent")
     private Attachment attachment;
 }

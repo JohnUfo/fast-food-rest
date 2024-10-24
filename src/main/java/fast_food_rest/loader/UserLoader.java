@@ -1,6 +1,5 @@
 package fast_food_rest.loader;
 
-import fast_food_rest.entity.User;
 import fast_food_rest.repository.UserRepository;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;

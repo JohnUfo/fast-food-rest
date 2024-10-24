@@ -10,10 +10,12 @@ import lombok.*;
 import java.util.List;
 
 @EqualsAndHashCode(callSuper = true)
-@Data
+
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
+@Setter
+@Getter
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @ToString(exclude = "foods")

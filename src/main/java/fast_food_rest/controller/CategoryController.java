@@ -44,7 +44,7 @@ public class CategoryController {
 
 
     @GetMapping
-    public ResponseEntity<?> getAllCategories() {
+    public ResponseEntity<List<CategoryDto>> getAllCategories() {
         try {
             List<CategoryDto> categories = categoryService.getAllCategories();
             return ResponseEntity.ok(categories);
@@ -125,14 +125,14 @@ public class CategoryController {
             attachment.setName("uniqueFileName_" + System.currentTimeMillis());
 
             // Save the Attachment entity first
-            attachment = attachmentRepository.save(attachment);
 
             // Save the file bytes in AttachmentContent
             AttachmentContent attachmentContent = new AttachmentContent();
             attachmentContent.setBytes(file.getBytes());
             attachmentContent.setAttachment(attachment);
+            attachment.setAttachmentContent(attachmentContent);
 
-            attachmentContentRepository.save(attachmentContent);
+            attachment = attachmentRepository.save(attachment);
         }
 
         // Step 2: Create and save the Food entity
@@ -151,14 +151,14 @@ public class CategoryController {
     @Transactional
     @DeleteMapping("/foods/{foodId}")
     public ResponseEntity<String> deleteFood(@PathVariable Long foodId) {
-        Food food = foodRepository.findById(foodId).orElseThrow();
-
-        if (food.getFile() != null) {
-            Attachment attachment = food.getFile();
-            attachmentContentRepository.deleteByAttachment(attachment);
-            attachmentRepository.delete(attachment);
-        }
-        foodRepository.delete(food);
+//        Food food = foodRepository.findById(foodId).orElseThrow();
+//
+//        if (food.getFile() != null) {
+//            Attachment attachment = food.getFile();
+//            attachmentContentRepository.deleteByAttachment(attachment);
+//            attachmentRepository.delete(attachment);
+//        }
+//        foodRepository.delete(food);
 
         foodRepository.deleteById(foodId);
         return ResponseEntity.ok("Food deleted successfully.");

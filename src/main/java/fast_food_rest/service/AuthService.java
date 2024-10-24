@@ -40,12 +40,12 @@ public class AuthService implements UserDetailsService {
     RoleRepository roleRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+    public UserDetails loadUserByUsername(String email) {
         Optional<User> optionalUser = userRepository.findUserByEmail(email);
         if (optionalUser.isPresent()) {
             return optionalUser.get();
         } else {
-            throw new UsernameNotFoundException(email);
+            return null;
         }
     }
 

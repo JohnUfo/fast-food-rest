@@ -6,9 +6,10 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @EqualsAndHashCode(callSuper = true)
-@Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Getter
+@Setter
 @Entity
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @ToString(exclude = "category")  // Prevent recursion in toString

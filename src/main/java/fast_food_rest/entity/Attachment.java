@@ -1,8 +1,11 @@
 package fast_food_rest.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.OneToOne;
 import lombok.*;
 import fast_food_rest.entity.template.AbsEntity;
 
@@ -28,4 +31,9 @@ public class Attachment extends AbsEntity {
 
     @Column(nullable = false, unique = true)
     private String name; // To locate file uniquely within the system
+
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
+    private AttachmentContent attachmentContent;
+
 }
