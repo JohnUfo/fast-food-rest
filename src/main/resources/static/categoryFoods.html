@@ -124,18 +124,17 @@
         fetch(`/categories/${categoryId}/foods`)
             .then(response => response.json())
             .then(data => {
-                // Clear existing foods
+
                 const foodList = document.getElementById('foodList');
                 foodList.innerHTML = '';
 
-                // Set category name
                 document.getElementById('categoryName').textContent = `Foods in Category: ${data.category.name}`;
 
                 data.foods.forEach(food => {
                     const foodItem = document.createElement('li');
                     foodItem.className = 'list-group-item';
                     foodItem.innerHTML = `
-        <img src="/image/${food.file.id}" alt="${food.name}" class="food-image" /> <!-- Adjust this line -->
+        <img src="/image/${food.file.id}" alt="${food.name}" class="food-image" />
         <strong>${food.name}</strong> - ${food.price} USD<br>
         <small>${food.description}</small>
         <div class="mt-2">
@@ -159,7 +158,7 @@
 
     // Function to handle form submission for adding a new food
     function addNewFood(event) {
-        event.preventDefault(); // Prevent page refresh
+        event.preventDefault();
 
         const categoryId = getCategoryIdFromUrl();
         const name = document.getElementById('foodName').value;
@@ -215,8 +214,6 @@
         editModal.show();
     }
 
-    // Function to handle food update
-    // Function to handle food update
     document.getElementById('editFoodForm').addEventListener('submit', function (event) {
         event.preventDefault();
 
@@ -237,13 +234,12 @@
 
         fetch(`/categories/foods/${foodId}`, {
             method: 'PUT',
-            body: formData // Send the form data here
+            body: formData
         })
             .then(response => response.text().then(text => {
                 if (response.status === 409) {
                     alert('Food with this name already exists!');
                 } else if (response.ok) {
-                    alert('Food updated successfully!');
                     const editModal = bootstrap.Modal.getInstance(document.getElementById('editFoodModal'));
                     editModal.hide();
                     fetchCategoryFoods(getCategoryIdFromUrl());
@@ -280,7 +276,6 @@
     // Event listener for the add food form
     document.getElementById('addFoodForm').addEventListener('submit', addNewFood);
 
-    // Fetch foods on page load
     window.onload = function () {
         const categoryId = getCategoryIdFromUrl();
         fetchCategoryFoods(categoryId);
