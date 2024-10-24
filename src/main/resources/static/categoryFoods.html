@@ -167,33 +167,34 @@
         const description = document.getElementById('foodDescription').value;
         const file = document.getElementById('file').files[0];
 
-        // Create FormData to handle the file and other form data
         const formData = new FormData();
         formData.append('name', name);
         formData.append('price', price);
         formData.append('description', description);
-        formData.append('file', file); // Append the file
+        formData.append('file', file);
 
         fetch(`/categories/${categoryId}/foods`, {
             method: 'POST',
-            body: formData // Use FormData instead of JSON
+            body: formData
         })
             .then(response => {
-                if (response.ok) {
-                    // Clear the form fields after successful submission
+                return response.text().then(bodyText => ({status: response.status, body: bodyText}));
+            })
+            .then(({status, body}) => {
+                if (status === 201) {
                     document.getElementById('foodName').value = '';
                     document.getElementById('foodPrice').value = '';
                     document.getElementById('foodDescription').value = '';
-                    document.getElementById('file').value = ''; // Clear file input
+                    document.getElementById('file').value = '';
 
-                    // Close the modal
                     const modal = bootstrap.Modal.getInstance(document.getElementById('addFoodModal'));
                     modal.hide();
 
-                    // Reload the food list to include the new food
                     fetchCategoryFoods(categoryId);
+                } else if (status === 409) {
+                    alert(body || 'Food already exists.');
                 } else {
-                    alert('Failed to add food. Please try again.');
+                    alert(body || 'Failed to add food. Please try again.');
                 }
             })
             .catch(error => {
@@ -201,6 +202,7 @@
                 alert('An error occurred while adding the food.');
             });
     }
+
 
     // Function to open edit modal
     function openEditModal(foodId, foodName, foodPrice, foodDescription) {
@@ -214,8 +216,9 @@
     }
 
     // Function to handle food update
+    // Function to handle food update
     document.getElementById('editFoodForm').addEventListener('submit', function (event) {
-        event.preventDefault(); // Prevent page refresh
+        event.preventDefault();
 
         const foodId = document.getElementById('editFoodId').value;
         const name = document.getElementById('editFoodName').value;
@@ -223,35 +226,36 @@
         const description = document.getElementById('editFoodDescription').value;
         const file = document.getElementById('editFoodFile').files[0];
 
-        // Create FormData to handle the file and other form data
         const formData = new FormData();
         formData.append('name', name);
         formData.append('price', price);
         formData.append('description', description);
 
         if (file) {
-            formData.append('file', file); // Only append the file if it exists
+            formData.append('file', file);
         }
 
         fetch(`/categories/foods/${foodId}`, {
             method: 'PUT',
-            body: formData // Use FormData instead of JSON
+            body: formData // Send the form data here
         })
-            .then(response => {
-                if (response.ok) {
+            .then(response => response.text().then(text => {
+                if (response.status === 409) {
+                    alert('Food with this name already exists!');
+                } else if (response.ok) {
+                    alert('Food updated successfully!');
                     const editModal = bootstrap.Modal.getInstance(document.getElementById('editFoodModal'));
                     editModal.hide();
                     fetchCategoryFoods(getCategoryIdFromUrl());
                 } else {
-                    alert('Failed to update food. Please try again.');
+                    alert(text);
                 }
-            })
+            }))
             .catch(error => {
                 console.error('Error updating food:', error);
                 alert('An error occurred while updating the food.');
             });
     });
-
 
     // Function to delete food
     function deleteFood(foodId) {

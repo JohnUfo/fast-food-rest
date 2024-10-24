@@ -1,13 +1,22 @@
 package fast_food_rest.service;
 
+import fast_food_rest.entity.Attachment;
+import fast_food_rest.entity.AttachmentContent;
 import fast_food_rest.entity.Category;
 import fast_food_rest.entity.Food;
 import fast_food_rest.payload.CategoryDto;
+import fast_food_rest.payload.FoodDto;
+import fast_food_rest.repository.AttachmentRepository;
 import fast_food_rest.repository.CategoryRepository;
 import fast_food_rest.repository.FoodRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.constraints.NotNull;
+import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -18,37 +27,46 @@ public class CategoryService {
     @Autowired
     private CategoryRepository categoryRepository;
 
-    @Autowired
-    private FoodRepository foodRepository;
-
     public List<CategoryDto> getAllCategories() {
         return categoryRepository.findAll().stream()
                 .map(category -> new CategoryDto(category.getId(), category.getName()))
                 .collect(Collectors.toList());
     }
 
-    public Category createCategory(Category category) {
-        boolean existsByName = categoryRepository.existsByName(category.getName());
-        if (existsByName) {
-            return null;
+    public @NotNull ResponseEntity<String> updateCategory(Long id, Category updatedCategory) {
+        if (updatedCategory.getName().isBlank()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Give reliable name.");
         }
-        return categoryRepository.save(category);
-    }
 
-
-    public boolean updateCategory(Long id, Category updatedCategory) {
-        boolean existsByName = categoryRepository.existsByName(updatedCategory.getName());
-        if (existsByName) {
-            return false;
+        if (categoryRepository.existsByNameAndIdNot(updatedCategory.getName(), id)) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body("Category already exists.");
         }
 
         Optional<Category> optionalCategory = categoryRepository.findById(id);
         if (optionalCategory.isEmpty()) {
-            return false;
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Category not found.");
         }
+
         Category category = optionalCategory.get();
         category.setName(updatedCategory.getName());
         categoryRepository.save(category);
-        return true;
+
+        return ResponseEntity.status(HttpStatus.ACCEPTED).body("Category edited successfully.");
+    }
+
+    public @NotNull ResponseEntity<?> creteCategory(Category category) {
+        if (category.getName().isBlank()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+        }
+        try {
+            boolean existsByName = categoryRepository.existsByName(category.getName());
+            if (existsByName) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Category already exists.");
+            }
+            Category saved = categoryRepository.save(category);
+            return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("An error occurred while creating the category.");
+        }
     }
 }
