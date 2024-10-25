@@ -6,5 +6,4 @@ import lombok.Data;
 public class BasketDto {
     private Long foodId;
     private Long quantity;
-    private String email;
 }

@@ -22,8 +22,7 @@ public class BasketController {
     @PostMapping("/add")
     public ResponseEntity<String> addFoodToBasket(
             @RequestBody BasketDto basketDto, @AuthenticationPrincipal User user) {
-
-        return basketService.addFoodToBasket(basketDto);
+        return basketService.addFoodToBasket(basketDto,user);
     }
 
     @GetMapping

@@ -21,11 +21,11 @@ import java.util.List;
 public class BasketService {
 
     @Autowired
-    BasketRepository basketRepository;
+    private BasketRepository basketRepository;
     @Autowired
-    BasketItemRepository basketItemRepository;
+    private BasketItemRepository basketItemRepository;
     @Autowired
-    FoodRepository foodRepository;
+    private FoodRepository foodRepository;
     @Autowired
     private UserRepository userRepository;
 
@@ -34,29 +34,30 @@ public class BasketService {
         this.basketRepository = basketRepository;
     }
 
-    public ResponseEntity<String> addFoodToBasket(BasketDto item) {
+    public ResponseEntity<String> addFoodToBasket(BasketDto item, User user) {
         Food food = foodRepository.findById(item.getFoodId()).orElse(null);
         if (food == null) {
             return ResponseEntity.badRequest().body("Food not found");
         }
-
-        User user = userRepository.findUserByEmail(item.getEmail()).orElse(null);
 
         Basket basket = user.getBasket();
         if (basket == null) {
             basket = new Basket();
             basket.setUser(user);
             user.setBasket(basket);
+            basketRepository.save(basket);
+            userRepository.save(user);
         }
 
-        BasketItem basketItem = new BasketItem();
-        basketItem.setFood(food);
-        basketItem.setQuantity(item.getQuantity());
-        basketItem.setBasket(basket);
+        addOrUpdateBasketItem(basket, food, item.getQuantity());
 
+        return ResponseEntity.ok("Food added to basket successfully");
+    }
+
+    private void addOrUpdateBasketItem(Basket basket, Food food, long quantity) {
+        BasketItem basketItem = new BasketItem(basket, food, quantity);
         basket.getBasketItems().add(basketItem);
         basketRepository.save(basket);
-        return ResponseEntity.ok("Food added to basket successfully");
     }
 
     public List<BasketItem> getBasketItems(User user) {
@@ -64,4 +65,3 @@ public class BasketService {
         return basketItemRepository.findBasketItemByBasket(basketByUser);
     }
 }
-

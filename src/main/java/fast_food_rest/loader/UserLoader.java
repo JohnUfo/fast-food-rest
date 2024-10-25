@@ -50,13 +50,13 @@ public class UserLoader implements ApplicationRunner {
         categoryRepository.save(new Category("Desserts", null));
 
 //        Spicy Chicken Burger  - 8 USD
-//        A crispy chicken patty topped with spicy mayo, lettuce, and pickles, served in a toasted bun.
+//        A crispy chicken patty topped with spicy mayo, lettuce, and pickles, served in a toasted bun
 //
 //        Classic Cheeseburger - 9 USD
-//        A juicy beef patty topped with melted cheddar cheese, lettuce, tomatoes, pickles, and our signature burger sauce, all sandwiched in a freshly toasted sesame bun.
+//        A juicy beef patty topped with melted cheddar cheese, lettuce, tomatoes, pickles, and our signature burger sauce
 //
 //        Bacon BBQ Burger - 10 USD
-//        A beef patty topped with sautéed mushrooms, melted Swiss cheese, caramelized onions, and creamy garlic aioli.
+//        A beef patty topped with sautéed mushrooms, melted Swiss cheese, caramelized onions, and creamy garlic aioli
 //
 //        Spicy Jalapeño Burger - 10 USD
 //        A zesty burger with pepper jack cheese, jalapeños, avocado slices, spicy mayo, and crispy lettuce on a toasted potato bun.

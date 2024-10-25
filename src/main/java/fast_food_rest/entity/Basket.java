@@ -7,15 +7,14 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Entity
 public class Basket extends AbsEntity {
 
     @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @OneToMany(mappedBy = "basket", cascade = CascadeType.ALL, orphanRemoval = true)
