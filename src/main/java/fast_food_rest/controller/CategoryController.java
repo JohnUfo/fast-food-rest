@@ -35,15 +35,9 @@ public class CategoryController {
     @Autowired
     FoodService foodService;
 
-
     @GetMapping
     public ResponseEntity<List<CategoryDto>> getAllCategories() {
-        try {
-            List<CategoryDto> categories = categoryService.getAllCategories();
-            return ResponseEntity.ok(categories);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
-        }
+        return ResponseEntity.ok(categoryService.getAllCategories());
     }
 
     @PostMapping
@@ -55,7 +49,6 @@ public class CategoryController {
     public ResponseEntity<String> updateCategory(@PathVariable Long id, @RequestBody Category updatedCategory) {
         return categoryService.updateCategory(id, updatedCategory);
     }
-
 
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteCategory(@PathVariable Long id) {
@@ -82,7 +75,7 @@ public class CategoryController {
     }
 
     @PutMapping("/foods/{foodId}")
-    public ResponseEntity<Food> updateFood(@PathVariable Long foodId, @RequestParam(value = "file",required = false) MultipartFile file, @ModelAttribute FoodDto newFood) throws java.io.IOException {
+    public ResponseEntity<Food> updateFood(@PathVariable Long foodId, @RequestParam(value = "file", required = false) MultipartFile file, @ModelAttribute FoodDto newFood) throws java.io.IOException {
         return foodService.updateFood(foodId, file, newFood);
     }
 }

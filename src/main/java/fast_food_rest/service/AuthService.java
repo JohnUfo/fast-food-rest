@@ -17,10 +17,7 @@ import fast_food_rest.entity.User;
 import fast_food_rest.repository.RoleRepository;
 import fast_food_rest.repository.UserRepository;
 
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Random;
-import java.util.Set;
+import java.util.*;
 
 @Service
 public class AuthService implements UserDetailsService {
@@ -54,10 +51,8 @@ public class AuthService implements UserDetailsService {
             return new ApiResponse("This user already exists", false);
         }
 
-        Role roleAdmin = roleRepository.findByName("ADMIN").orElseGet(() -> roleRepository.save(new Role("ADMIN")));
-        Role roleFoodEditor = roleRepository.findByName("FOOD_EDITOR").orElseGet(() -> roleRepository.save(new Role("FOOD_EDITOR")));
-        Role roleCategoryEditor = roleRepository.findByName("CATEGORY_EDITOR").orElseGet(() -> roleRepository.save(new Role("CATEGORY_EDITOR")));
-        Role roleUser = roleRepository.findByName("USER").orElseGet(() -> roleRepository.save(new Role("USER")));
+
+        List<Role> allRoles = roleRepository.findAll();
 
         User user = new User();
         user.setFullName(registerDto.getFullName());
@@ -67,11 +62,17 @@ public class AuthService implements UserDetailsService {
 
         Set<Role> roles = new HashSet<>();
         if (user.getEmail().equals("m1lymoe16@gmail.com")) {
-            roles.add(roleAdmin);
-            roles.add(roleCategoryEditor);
-            roles.add(roleFoodEditor);
+            for (Role allRole : allRoles) {
+                if (!allRole.getName().equals("USER")) {
+                    roles.add(allRole);
+                }
+            }
         } else {
-            roles.add(roleUser);
+            for (Role allRole : allRoles) {
+                if (allRole.getName().equals("USER")) {
+                    roles.add(allRole);
+                }
+            }
         }
         user.setRoles(roles);
         userRepository.save(user);
