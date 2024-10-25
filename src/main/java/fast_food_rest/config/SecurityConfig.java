@@ -38,14 +38,14 @@ public class SecurityConfig {
                 .sessionManagement()
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .authorizeRequests()
-                .requestMatchers("/categories/**").permitAll()
-                .requestMatchers(HttpMethod.POST, "/categories/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.PUT, "/categories/**").hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE, "/categories/**").hasRole("ADMIN")
+//                .authorizeRequests()
+//                .requestMatchers("/categories/**").permitAll()
+//                .requestMatchers(HttpMethod.POST, "/categories/**").hasRole("ADMIN")
+//                .requestMatchers(HttpMethod.PUT, "/categories/**").hasRole("ADMIN")
+//                .requestMatchers(HttpMethod.DELETE, "/categories/**").hasRole("ADMIN")
 //                .requestMatchers("/userMenuPage.html").hasRole("USER")
 //                .requestMatchers("/adminMenuPage.html").hasRole("ADMIN")
-                .and()
+//                .and()
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

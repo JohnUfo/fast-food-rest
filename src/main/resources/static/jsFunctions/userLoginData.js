@@ -1,7 +1,6 @@
 function fetchUserData() {
     const token = localStorage.getItem('JWT_TOKEN');
 
-    // Verify the user's token and get user details
     fetch('/api/users/getUserDetails', {
         method: 'GET',
         headers: {

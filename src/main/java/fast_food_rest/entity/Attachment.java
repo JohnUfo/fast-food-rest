@@ -12,7 +12,8 @@ import fast_food_rest.entity.template.AbsEntity;
 import javax.validation.constraints.Min;
 
 @EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
@@ -20,17 +21,17 @@ import javax.validation.constraints.Min;
 public class Attachment extends AbsEntity {
 
     @Column(nullable = false)
-    private String fileOriginalName; // pdp.jpg, inn.pdf
+    private String fileOriginalName;
 
     @Column(nullable = false)
     @Min(value = 1, message = "Size must be greater than 0")
-    private long size; // 2048000
+    private long size;
 
     @Column(nullable = false)
-    private String contentType; // application/pdf, image/png
+    private String contentType;
 
     @Column(nullable = false, unique = true)
-    private String name; // To locate file uniquely within the system
+    private String name;
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonIgnore

@@ -6,7 +6,8 @@ import lombok.*;
 import fast_food_rest.entity.template.AbsEntity;
 
 @EqualsAndHashCode(callSuper = true)
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity

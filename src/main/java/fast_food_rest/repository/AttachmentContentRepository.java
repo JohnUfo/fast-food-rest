@@ -11,5 +11,4 @@ import java.util.Optional;
 public interface AttachmentContentRepository extends JpaRepository<AttachmentContent, Long> {
     Optional<AttachmentContent> findByAttachmentId(Long attachmentId);
 
-    void deleteByAttachment(Attachment attachment);
 }
