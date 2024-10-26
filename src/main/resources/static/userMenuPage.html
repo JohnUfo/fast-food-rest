@@ -56,7 +56,7 @@
 <div class="container">
     <h2 class="text-center my-4">User Menu</h2>
     <div class="d-flex justify-content-between mb-4">
-        <button class="btn btn-primary" onclick="window.location.href='basket.html'">Your Basket</button>
+        <button class="btn btn-primary" onclick="openBasketModal()">Your Basket</button>
         <button class="btn btn-danger" onclick="logout()">Logout</button>
     </div>
 
@@ -80,7 +80,8 @@
                 <div class="quantity-controls">
                     <button class="btn btn-secondary" onclick="updateQuantity(false)">-</button>
                     <label for="modalFoodQuantity"></label>
-                    <input type="number" id="modalFoodQuantity" value="1" min="1" style="width: 40px; text-align: center;" readonly>
+                    <input type="number" id="modalFoodQuantity" value="1" min="1"
+                           style="width: 40px; text-align: center;" readonly>
                     <button class="btn btn-secondary" onclick="updateQuantity(true)">+</button>
                 </div>
             </div>
@@ -95,7 +96,66 @@
     </div>
 </div>
 
+<!-- Basket Modal -->
+<div class="modal fade" id="basketModal" tabindex="-1" aria-labelledby="basketModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="basketModalLabel">Your Basket</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="basketItems"></div>
+                <div class="d-flex justify-content-end mt-3">
+                    <button type="button" class="btn btn-primary" onclick="checkout()">Proceed to Checkout</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
 <script>
+    function openBasketModal() {
+        const token = localStorage.getItem('JWT_TOKEN');
+
+        fetch('/basket', {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(response => response.json())
+            .then(basket => {
+                const basketItems = basket.basketItems; // Accessing the basketItems array
+                const basketItem = document.getElementById('basketItems');
+                basketItem.innerHTML = '';
+
+                basketItems.forEach(item => {
+                    const food = item.food; // Access the food object
+                    const itemRow = document.createElement('div');
+                    itemRow.className = 'd-flex align-items-center border-bottom py-2';
+
+                    itemRow.innerHTML = `
+                    <img src="/image/${food.file.id}" alt="${food.name}" style="width: 50px; height: 50px; margin-right: 10px;">
+                    <div class="flex-grow-1">
+                        <strong>${food.name}</strong><br>
+                        <small>${food.description}</small><br>
+                        <span>${item.quantity} x $${food.price.toFixed(2)}</span>
+                    </div>
+                    <span class="ml-2">$${(food.price * item.quantity).toFixed(2)}</span>
+                `;
+
+                    basketItem.appendChild(itemRow);
+                });
+
+                const modal = new bootstrap.Modal(document.getElementById('basketModal'));
+                modal.show();
+            })
+            .catch(error => console.error('Error fetching basket:', error));
+    }
+
+
+
     let currentFoodId = null;
 
     function fetchCategories() {

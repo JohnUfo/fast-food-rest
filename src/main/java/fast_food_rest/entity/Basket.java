@@ -1,6 +1,7 @@
 package fast_food_rest.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import fast_food_rest.entity.template.AbsEntity;
 import jakarta.persistence.*;
@@ -20,6 +21,7 @@ public class Basket extends AbsEntity {
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
+    @JsonIgnore
     private User user;
 
     @OneToMany(mappedBy = "basket", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -75,4 +75,8 @@ public class BasketService {
             return ResponseEntity.badRequest().body("Food not found");
         }
     }
+
+    public Basket getUserBasketItems(User user) {
+        return basketRepository.findBasketByUser(user);
+    }
 }
