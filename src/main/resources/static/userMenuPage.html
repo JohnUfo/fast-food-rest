@@ -79,7 +79,8 @@
                 <p class="food-card-price" id="modalFoodPrice"></p>
                 <div class="quantity-controls">
                     <button class="btn btn-secondary" onclick="updateQuantity(false)">-</button>
-                    <input type="number" id="modalFoodQuantity" value="1" min="1" style="width: 40px; text-align: center;">
+                    <input type="number" id="modalFoodQuantity" value="1" min="1"
+                           style="width: 40px; text-align: center;">
                     <button class="btn btn-secondary" onclick="updateQuantity(true)">+</button>
                 </div>
             </div>
@@ -161,15 +162,20 @@
                 'Authorization': `Bearer ${token}`
             }
         })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch food quantity');
+                }
+                return response.json();
+            })
             .then(data => {
-                console.log("quantity: " + data)
-                // Ensure quantity is set correctly
-                document.getElementById('modalFoodQuantity').value = data.quantity != null ? data.quantity : 1;
+                const quantity = data != null ? data : 1; // Default to 1 if quantity not found
+                console.log("quantity: " + quantity)
+                document.getElementById('modalFoodQuantity').value = quantity;
             })
             .catch(error => {
                 console.error('Error fetching food quantity:', error);
-                document.getElementById('modalFoodQuantity').value = 1; // Default to 1 if not found
+                document.getElementById('modalFoodQuantity').value = 1; // Default to 1 if error occurs
             });
     }
 
@@ -196,19 +202,20 @@
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ foodId: currentFoodId, quantity })
+            body: JSON.stringify({foodId: currentFoodId, quantity})
         })
             .then(response => {
                 if (response.ok) {
                     return response.text();
                 } else {
-                    return response.text().then(text => { throw new Error(text); });
+                    return response.text().then(text => {
+                        throw new Error(text);
+                    });
                 }
             })
             .then(data => {
+
                 alert(data);
-
-
                 const modal = bootstrap.Modal.getInstance(document.getElementById('foodModal'));
                 modal.hide();
 
@@ -218,10 +225,6 @@
                 alert(error.message || 'An error occurred while adding to the basket. Please try again.');
             });
     });
-
-
-
-
 
     document.addEventListener('DOMContentLoaded', fetchCategories);
 </script>
