@@ -12,7 +12,7 @@ import lombok.*;
 @Setter
 @Entity
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@ToString(exclude = "category")  // Prevent recursion in toString
+@ToString(exclude = "category")
 public class Food extends AbsEntity {
 
     @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)

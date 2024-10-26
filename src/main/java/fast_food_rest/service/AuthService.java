@@ -39,11 +39,7 @@ public class AuthService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String email) {
         Optional<User> optionalUser = userRepository.findUserByEmail(email);
-        if (optionalUser.isPresent()) {
-            return optionalUser.get();
-        } else {
-            throw new UsernameNotFoundException(email);
-        }
+        return optionalUser.orElse(null);
     }
 
     public ApiResponse registerUser(RegisterDto registerDto) {
