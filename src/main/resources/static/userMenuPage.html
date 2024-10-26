@@ -172,7 +172,7 @@
                 return response.json();
             })
             .then(data => {
-                const defaultQuantity = data===0?1:data;
+                const defaultQuantity = data === 0 ? 1 : data;
 
                 console.log("Setting quantity to: " + defaultQuantity);
                 document.getElementById('modalFoodQuantity').value = defaultQuantity;
