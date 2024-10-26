@@ -24,8 +24,7 @@ public class BasketController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<String> addFoodToBasket(
-            @RequestBody BasketDto basketDto, @AuthenticationPrincipal User user) {
+    public ResponseEntity<String> addFoodToBasket(@RequestBody BasketDto basketDto, @AuthenticationPrincipal User user) {
         return basketService.addFoodToBasket(basketDto, user);
     }
 
@@ -37,7 +36,12 @@ public class BasketController {
     }
 
     @DeleteMapping("/{foodId}")
-    public ResponseEntity<String> removeFromBasket(@PathVariable Long foodId,@AuthenticationPrincipal User user) {
-     return    basketService.removeFromBasket(foodId, user);
+    public ResponseEntity<String> removeFromBasket(@PathVariable Long foodId, @AuthenticationPrincipal User user) {
+        return basketService.removeFromBasket(foodId, user);
+    }
+
+    @DeleteMapping("/checkout")
+    public ResponseEntity<String> checkout(@AuthenticationPrincipal User user) {
+        return basketService.checkout(user);
     }
 }

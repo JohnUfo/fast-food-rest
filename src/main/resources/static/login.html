@@ -33,17 +33,14 @@
         const email = document.getElementById('email').value;
         const password = document.getElementById('password').value;
 
-        // Send login request
         fetch('/login?email=' + encodeURIComponent(email) + '&password=' + encodeURIComponent(password), {
             method: 'POST',
         })
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    // Store the token in localStorage
                     localStorage.setItem('JWT_TOKEN', data.token);
 
-                    // Get the user's roles and redirect accordingly
                     const roles = data.roles;
                     if (roles.includes('ADMIN')) {
                         window.location.href = 'adminMenuPage.html';

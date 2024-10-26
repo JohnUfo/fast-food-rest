@@ -116,9 +116,33 @@
 
 
 <script>
-    function openBasketModal() {
-        const token = localStorage.getItem('JWT_TOKEN');
+    const token = localStorage.getItem('JWT_TOKEN');
 
+    function checkout() {
+        if (confirm('Are you sure you want to checkout?')) {
+            fetch(`/basket/checkout`, {
+                method: 'DELETE',
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+                .then(response => {
+                    if (response.ok) {
+                        const basketModal = bootstrap.Modal.getInstance(document.getElementById('basketModal'));
+                        basketModal.hide();
+                    } else {
+                        alert('Failed to delete food. Please try again.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error deleting food:', error);
+                    alert('An error occurred while deleting the food.');
+                });
+        }
+    }
+
+
+    function openBasketModal() {
         fetch('/basket', {
             headers: {
                 'Authorization': `Bearer ${token}`
@@ -126,24 +150,25 @@
         })
             .then(response => response.json())
             .then(basket => {
-                const basketItems = basket.basketItems; // Accessing the basketItems array
+                const basketItems = basket.basketItems;
                 const basketItem = document.getElementById('basketItems');
                 basketItem.innerHTML = '';
 
                 basketItems.forEach(item => {
-                    const food = item.food; // Access the food object
+                    const food = item.food;
                     const itemRow = document.createElement('div');
                     itemRow.className = 'd-flex align-items-center border-bottom py-2';
 
                     itemRow.innerHTML = `
-                    <img src="/image/${food.file.id}" alt="${food.name}" style="width: 50px; height: 50px; margin-right: 10px;">
-                    <div class="flex-grow-1">
-                        <strong>${food.name}</strong><br>
-                        <small>${food.description}</small><br>
-                        <span>${item.quantity} x $${food.price.toFixed(2)}</span>
-                    </div>
-                    <span class="ml-2">$${(food.price * item.quantity).toFixed(2)}</span>
-                `;
+                <img src="/image/${food.file.id}" alt="${food.name}" style="width: 50px; height: 50px; margin-right: 10px;">
+                <div class="flex-grow-1">
+                    <strong>${food.name}</strong><br>
+                    <small>${food.description}</small><br>
+                    <span>${item.quantity} x $${food.price.toFixed(2)}</span>
+                </div>
+                <span class="ml-2">$${(food.price * item.quantity).toFixed(2)}</span>
+                <button class="btn btn-danger btn-sm ml-2" onclick="removeFromBasket(${food.id})">Remove</button>
+            `;
 
                     basketItem.appendChild(itemRow);
                 });
@@ -154,7 +179,24 @@
             .catch(error => console.error('Error fetching basket:', error));
     }
 
+    function removeFromBasket(foodId) {
 
+        fetch(`/basket/${foodId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(response => {
+                if (response.ok) {
+                    const basketModal = bootstrap.Modal.getInstance(document.getElementById('basketModal'));
+                    basketModal.hide();
+                } else {
+                    console.error('Failed to remove item from basket');
+                }
+            })
+            .catch(error => console.error('Error removing item:', error));
+    }
 
     let currentFoodId = null;
 
@@ -218,7 +260,6 @@
         const modal = new bootstrap.Modal(document.getElementById('foodModal'));
         modal.show();
 
-        const token = localStorage.getItem('JWT_TOKEN');
         fetch(`/basket/getQuantity/${id}`, {
             method: 'GET',
             headers: {
@@ -240,7 +281,7 @@
                 const quantity = data || 0;
 
                 if (quantity > 0) {
-                    document.getElementById('addToBasketButton').style.display = 'block'; // Hide Add to Basket
+                    document.getElementById('addToBasketButton').style.display = 'block'; // Show Add to Basket
                     document.getElementById('removeFromBasketButton').style.display = 'block'; // Show Remove from Basket
                 } else {
                     document.getElementById('addToBasketButton').style.display = 'block'; // Show Add to Basket
@@ -270,8 +311,6 @@
     }
 
     document.getElementById('removeFromBasketButton').addEventListener('click', () => {
-        const token = localStorage.getItem('JWT_TOKEN');
-
         fetch(`/basket/${currentFoodId}`, {
             method: 'DELETE',
             headers: {
@@ -302,7 +341,6 @@
 
     document.getElementById('addToBasketButton').addEventListener('click', () => {
         const quantity = parseInt(document.getElementById('modalFoodQuantity').value) || 1;
-        const token = localStorage.getItem('JWT_TOKEN');
 
         fetch(`/basket/add`, {
             method: 'POST',

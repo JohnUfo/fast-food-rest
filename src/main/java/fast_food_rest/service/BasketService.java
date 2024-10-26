@@ -79,4 +79,18 @@ public class BasketService {
     public Basket getUserBasketItems(User user) {
         return basketRepository.findBasketByUser(user);
     }
+
+    public ResponseEntity<String> checkout(User user) {
+        try {
+            Basket basketByUser = basketRepository.findBasketByUser(user);
+            if (basketByUser != null) {
+            basketRepository.delete(basketByUser);
+            userRepository.save(user);
+            return ResponseEntity.ok("FOOD CHECKOUT DONE!");
+            }else
+                return ResponseEntity.badRequest().body("NOTHING TO CHECKOUT");
+        }catch (Exception e) {
+            return ResponseEntity.badRequest().body("CHECKOUT FAILED.");
+        }
+    }
 }
