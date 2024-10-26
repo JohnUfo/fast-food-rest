@@ -1,6 +1,5 @@
 package fast_food_rest.controller;
 
-import fast_food_rest.repository.RoleRepository;
 import fast_food_rest.service.RoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
