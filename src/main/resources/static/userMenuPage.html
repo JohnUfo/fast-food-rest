@@ -79,15 +79,17 @@
                 <p class="food-card-price" id="modalFoodPrice"></p>
                 <div class="quantity-controls">
                     <button class="btn btn-secondary" onclick="updateQuantity(false)">-</button>
-                    <input type="number" id="modalFoodQuantity" value="1" min="1"
-                           style="width: 40px; text-align: center;">
+                    <label for="modalFoodQuantity"></label><input type="number" id="modalFoodQuantity" value="1" min="1"
+                                                                  style="width: 40px; text-align: center;">
                     <button class="btn btn-secondary" onclick="updateQuantity(true)">+</button>
                 </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" id="addToBasketButton">Add to Basket</button>
-                <button type="button" class="btn btn-danger" id="removeFromBasketButton" style="display: none;">Remove from Basket</button>
+                <button type="button" class="btn btn-danger" id="removeFromBasketButton" style="display: none;">Remove
+                    from Basket
+                </button>
             </div>
         </div>
     </div>
@@ -170,10 +172,13 @@
                 return response.json();
             })
             .then(data => {
-                const quantity = data != null ? data : 1; // Default to 1 if quantity not found
-                document.getElementById('modalFoodQuantity').value = quantity;
+                const defaultQuantity = data===0?1:data;
 
-                // Show/hide buttons based on the quantity
+                console.log("Setting quantity to: " + defaultQuantity);
+                document.getElementById('modalFoodQuantity').value = defaultQuantity;
+
+                const quantity = data || 0;
+
                 if (quantity > 0) {
                     document.getElementById('addToBasketButton').style.display = 'block'; // Hide Add to Basket
                     document.getElementById('removeFromBasketButton').style.display = 'block'; // Show Remove from Basket
@@ -207,13 +212,13 @@
     document.getElementById('removeFromBasketButton').addEventListener('click', () => {
         const token = localStorage.getItem('JWT_TOKEN');
 
-        fetch(`/basket/remove/${currentFoodId}`, {
-            method: 'POST',
+        fetch(`/basket/${currentFoodId}`, {
+            method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({ foodId: currentFoodId })
+            body: JSON.stringify({foodId: currentFoodId}) // Keep this if needed
         })
             .then(response => {
                 if (response.ok) {

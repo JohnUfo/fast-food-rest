@@ -36,7 +36,7 @@ public class BasketController {
         return ResponseEntity.ok(quantity);
     }
 
-    @PostMapping("/remove/{foodId}")
+    @DeleteMapping("/{foodId}")
     public ResponseEntity<String> removeFromBasket(@PathVariable Long foodId,@AuthenticationPrincipal User user) {
      return    basketService.removeFromBasket(foodId, user);
     }
