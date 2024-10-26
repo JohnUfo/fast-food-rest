@@ -27,6 +27,12 @@ public class BasketController {
 
     @GetMapping
     public ResponseEntity<List<BasketItem>> getBasketItems(@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(basketService.getBasketItems(user));
+        return ResponseEntity.ok(user.getBasket().getBasketItems());
+    }
+
+    @GetMapping("/getQuantity/{foodId}")
+    public ResponseEntity<Long> getQuantity(@PathVariable Long foodId, @AuthenticationPrincipal User user) {
+        long quantity = basketService.getQuantity(foodId,user);
+        return ResponseEntity.ok(quantity);
     }
 }

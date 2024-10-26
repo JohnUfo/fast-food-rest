@@ -40,28 +40,29 @@ public class BasketService {
             return ResponseEntity.badRequest().body("Food not found");
         }
 
-        Basket basket = user.getBasket();
-        if (basket == null) {
-            basket = new Basket();
-            basket.setUser(user);
-            user.setBasket(basket);
-            basketRepository.save(basket);
-            userRepository.save(user);
+        List<BasketItem> basketItems = user.getBasket().getBasketItems();
+        for (BasketItem basketItem : basketItems) {
+            if (basketItem.getFood().getId().equals(item.getFoodId())) {
+                basketItem.setQuantity(item.getQuantity());
+                basketItemRepository.save(basketItem);
+                return ResponseEntity.ok("Updated food quantity in basket");
+            }
         }
 
-        addOrUpdateBasketItem(basket, food, item.getQuantity());
-
+        Basket basket = user.getBasket();
+        BasketItem basketItem = new BasketItem(basket, food, item.getQuantity());
+        basket.getBasketItems().add(basketItem);
+        basketRepository.save(basket);
         return ResponseEntity.ok("Food added to basket successfully");
     }
 
-    private void addOrUpdateBasketItem(Basket basket, Food food, long quantity) {
-        BasketItem basketItem = new BasketItem(basket, food, quantity);
-        basket.getBasketItems().add(basketItem);
-        basketRepository.save(basket);
-    }
-
-    public List<BasketItem> getBasketItems(User user) {
-        Basket basketByUser = basketRepository.findBasketByUser(user);
-        return basketItemRepository.findBasketItemByBasket(basketByUser);
+    public int getQuantity(Long foodId, User user) {
+        List<BasketItem> basketItems = user.getBasket().getBasketItems();
+        for (BasketItem basketItem : basketItems) {
+            if (basketItem.getFood().getId().equals(foodId)) {
+                return Math.toIntExact(basketItem.getQuantity());
+            }
+        }
+        return 0;
     }
 }

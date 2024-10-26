@@ -8,13 +8,11 @@
     <script type="module" src="jsFunctions/userLoginData.js"></script>
     <script src="jsFunctions/logout.js"></script>
     <style>
-        /* Highlight selected category button */
         .category-btn.active {
             background-color: #007bff;
             color: #fff;
         }
 
-        /* Improved styling for food cards with uniform dimensions */
         .food-card {
             width: 100%;
             max-width: 300px;
@@ -63,9 +61,8 @@
     </div>
 
     <h3>Categories</h3>
-    <div class="row" id="categoryRow"></div> <!-- Row to hold category names -->
-
-    <div class="row mt-4" id="foodList"></div> <!-- List of foods will be displayed here -->
+    <div class="row" id="categoryRow"></div>
+    <div class="row mt-4" id="foodList"></div>
 </div>
 
 <!-- Modal for adding food to basket -->
@@ -82,8 +79,7 @@
                 <p class="food-card-price" id="modalFoodPrice"></p>
                 <div class="quantity-controls">
                     <button class="btn btn-secondary" onclick="updateQuantity(false)">-</button>
-                    <input type="number" id="modalFoodQuantity" value="1" min="1"
-                           style="width: 40px; text-align: center;">
+                    <input type="number" id="modalFoodQuantity" value="1" min="1" style="width: 40px; text-align: center;">
                     <button class="btn btn-secondary" onclick="updateQuantity(true)">+</button>
                 </div>
             </div>
@@ -98,7 +94,6 @@
 <script>
     let currentFoodId = null;
 
-    // Function to fetch categories and display them in a row
     function fetchCategories() {
         fetch('/categories')
             .then(response => response.json())
@@ -109,13 +104,11 @@
                     const categoryCol = document.createElement('div');
                     categoryCol.className = 'col-md-3 mb-2';
                     categoryCol.innerHTML = `
-                        <button class="btn btn-outline-primary w-100 category-btn" id="category-${category.id}"
-                                onclick="showCategoryFoods(${category.id}, '${category.name}')">
+                        <button class="btn btn-outline-primary w-100 category-btn" id="category-${category.id}" onclick="showCategoryFoods(${category.id}, '${category.name}')">
                                 ${category.name}
                         </button>`;
                     categoryRow.appendChild(categoryCol);
 
-                    // Automatically load the foods of the first category on page load
                     if (index === 0) {
                         showCategoryFoods(category.id, category.name);
                     }
@@ -124,9 +117,7 @@
             .catch(error => console.error('Error fetching categories:', error));
     }
 
-    // Function to fetch and display foods of a selected category
     function showCategoryFoods(categoryId) {
-        // Highlight the selected category button
         document.querySelectorAll('.category-btn').forEach(btn => btn.classList.remove('active'));
         document.getElementById(`category-${categoryId}`).classList.add('active');
 
@@ -134,9 +125,8 @@
             .then(response => response.json())
             .then(data => {
                 const foodList = document.getElementById('foodList');
-                foodList.innerHTML = ''; // Clear previous food items
+                foodList.innerHTML = '';
 
-                // Display each food item with a Bootstrap card
                 data.foods.forEach(food => {
                     const foodCard = document.createElement('div');
                     foodCard.className = 'col-md-4 mb-4 d-flex justify-content-center';
@@ -154,23 +144,35 @@
             .catch(error => console.error('Error fetching foods:', error));
     }
 
-    // Function to open the modal with food details
     function openFoodModal(id, name, description, price, imageUrl) {
-        currentFoodId = id; // Store the current food ID
+        currentFoodId = id;
         document.getElementById('foodModalLabel').innerText = name;
         document.getElementById('modalFoodDescription').innerText = description;
         document.getElementById('modalFoodPrice').innerText = `Price: $${price}`;
         document.getElementById('modalFoodImage').src = imageUrl;
 
-        // Show the modal
         const modal = new bootstrap.Modal(document.getElementById('foodModal'));
         modal.show();
 
-        // Reset the quantity input
-        document.getElementById('modalFoodQuantity').value = 1;
+        const token = localStorage.getItem('JWT_TOKEN');
+        fetch(`/basket/getQuantity/${id}`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log("quantity: " + data)
+                // Ensure quantity is set correctly
+                document.getElementById('modalFoodQuantity').value = data.quantity != null ? data.quantity : 1;
+            })
+            .catch(error => {
+                console.error('Error fetching food quantity:', error);
+                document.getElementById('modalFoodQuantity').value = 1; // Default to 1 if not found
+            });
     }
 
-    // Function to update quantity in the modal
     function updateQuantity(increment) {
         const quantityInput = document.getElementById('modalFoodQuantity');
         let quantity = parseInt(quantityInput.value) || 1;
@@ -184,7 +186,6 @@
         quantityInput.value = quantity;
     }
 
-    // Function to add food to the basket from the modal
     document.getElementById('addToBasketButton').addEventListener('click', () => {
         const quantity = parseInt(document.getElementById('modalFoodQuantity').value) || 1;
         const token = localStorage.getItem('JWT_TOKEN');
@@ -195,16 +196,32 @@
                 'Content-Type': 'application/json',
                 'Authorization': `Bearer ${token}`
             },
-            body: JSON.stringify({foodId: currentFoodId, quantity})
+            body: JSON.stringify({ foodId: currentFoodId, quantity })
         })
-            .then(response => response.json())
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    return response.text().then(text => { throw new Error(text); });
+                }
+            })
             .then(data => {
-                alert(`${data.message}`);
+                alert(data);
+
+
                 const modal = bootstrap.Modal.getInstance(document.getElementById('foodModal'));
                 modal.hide();
+
             })
-            .catch(error => console.error('Error adding to basket:', error));
+            .catch(error => {
+                console.error('Error adding to basket:', error);
+                alert(error.message || 'An error occurred while adding to the basket. Please try again.');
+            });
     });
+
+
+
+
 
     document.addEventListener('DOMContentLoaded', fetchCategories);
 </script>

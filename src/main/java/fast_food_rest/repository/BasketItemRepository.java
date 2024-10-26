@@ -9,4 +9,6 @@ import java.util.List;
 
 public interface BasketItemRepository extends JpaRepository<BasketItem, Long> {
     List<BasketItem> findBasketItemByBasket(Basket basket);
+
+    boolean findByFood_IdAndBasket(Long foodId, Basket basket);
 }

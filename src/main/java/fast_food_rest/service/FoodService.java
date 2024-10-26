@@ -101,4 +101,8 @@ public class FoodService {
         Food savedFood = foodRepository.save(food);
         return ResponseEntity.status(HttpStatus.OK).body(savedFood);
     }
+
+    public Food getFoodDetails(Long foodId) {
+        return foodRepository.findById(foodId).orElseThrow();
+    }
 }
