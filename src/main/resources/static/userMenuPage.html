@@ -85,8 +85,9 @@
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-primary" id="addToBasketButton">Add to Basket</button>
+                <button type="button" class="btn btn-danger" id="removeFromBasketButton" style="display: none;">Remove from Basket</button>
             </div>
         </div>
     </div>
@@ -170,14 +171,25 @@
             })
             .then(data => {
                 const quantity = data != null ? data : 1; // Default to 1 if quantity not found
-                console.log("quantity: " + quantity)
                 document.getElementById('modalFoodQuantity').value = quantity;
+
+                // Show/hide buttons based on the quantity
+                if (quantity > 0) {
+                    document.getElementById('addToBasketButton').style.display = 'block'; // Hide Add to Basket
+                    document.getElementById('removeFromBasketButton').style.display = 'block'; // Show Remove from Basket
+                } else {
+                    document.getElementById('addToBasketButton').style.display = 'block'; // Show Add to Basket
+                    document.getElementById('removeFromBasketButton').style.display = 'none'; // Hide Remove from Basket
+                }
             })
             .catch(error => {
                 console.error('Error fetching food quantity:', error);
                 document.getElementById('modalFoodQuantity').value = 1; // Default to 1 if error occurs
+                document.getElementById('addToBasketButton').style.display = 'block'; // Show Add to Basket
+                document.getElementById('removeFromBasketButton').style.display = 'none'; // Hide Remove from Basket
             });
     }
+
 
     function updateQuantity(increment) {
         const quantityInput = document.getElementById('modalFoodQuantity');
@@ -191,6 +203,37 @@
 
         quantityInput.value = quantity;
     }
+
+    document.getElementById('removeFromBasketButton').addEventListener('click', () => {
+        const token = localStorage.getItem('JWT_TOKEN');
+
+        fetch(`/basket/remove/${currentFoodId}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ foodId: currentFoodId })
+        })
+            .then(response => {
+                if (response.ok) {
+                    return response.text();
+                } else {
+                    return response.text().then(text => {
+                        throw new Error(text);
+                    });
+                }
+            })
+            .then(data => {
+                alert(data);
+                const modal = bootstrap.Modal.getInstance(document.getElementById('foodModal'));
+                modal.hide();
+            })
+            .catch(error => {
+                console.error('Error removing from basket:', error);
+                alert(error.message || 'An error occurred while removing from the basket. Please try again.');
+            });
+    });
 
     document.getElementById('addToBasketButton').addEventListener('click', () => {
         const quantity = parseInt(document.getElementById('modalFoodQuantity').value) || 1;

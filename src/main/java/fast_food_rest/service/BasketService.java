@@ -65,4 +65,14 @@ public class BasketService {
         }
         return 0;
     }
+
+    public ResponseEntity<String> removeFromBasket(Long foodId, User user) {
+        try {
+            user.getBasket().getBasketItems().removeIf(item -> item.getFood().getId().equals(foodId));
+            userRepository.save(user);
+            return ResponseEntity.ok("Food removed from basket successfully");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Food not found");
+        }
+    }
 }

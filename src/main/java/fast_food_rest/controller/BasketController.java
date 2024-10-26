@@ -22,7 +22,7 @@ public class BasketController {
     @PostMapping("/add")
     public ResponseEntity<String> addFoodToBasket(
             @RequestBody BasketDto basketDto, @AuthenticationPrincipal User user) {
-        return basketService.addFoodToBasket(basketDto,user);
+        return basketService.addFoodToBasket(basketDto, user);
     }
 
     @GetMapping
@@ -32,7 +32,12 @@ public class BasketController {
 
     @GetMapping("/getQuantity/{foodId}")
     public ResponseEntity<Long> getQuantity(@PathVariable Long foodId, @AuthenticationPrincipal User user) {
-        long quantity = basketService.getQuantity(foodId,user);
+        long quantity = basketService.getQuantity(foodId, user);
         return ResponseEntity.ok(quantity);
+    }
+
+    @PostMapping("/remove/{foodId}")
+    public ResponseEntity<String> removeFromBasket(@PathVariable Long foodId,@AuthenticationPrincipal User user) {
+     return    basketService.removeFromBasket(foodId, user);
     }
 }
