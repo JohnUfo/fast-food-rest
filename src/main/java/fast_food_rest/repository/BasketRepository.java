@@ -7,4 +7,6 @@ import fast_food_rest.entity.Basket;
 
 public interface BasketRepository extends JpaRepository<Basket, Long> {
     Basket findBasketByUser(User user);
+
+    Basket getBasketByUser(User user);
 }

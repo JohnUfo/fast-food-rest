@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -40,7 +42,17 @@ public class BasketService {
             return ResponseEntity.badRequest().body("Food not found");
         }
 
-        List<BasketItem> basketItems = user.getBasket().getBasketItems();
+        Basket basketByUser = basketRepository.getBasketByUser(user);
+
+        if (basketByUser == null) {
+            basketByUser = new Basket();
+            basketByUser.setUser(user);
+            basketByUser.setBasketItems(new ArrayList<>());
+            basketRepository.save(basketByUser);
+            user.setBasket(basketByUser);
+        }
+
+        List<BasketItem> basketItems = basketByUser.getBasketItems();
         for (BasketItem basketItem : basketItems) {
             if (basketItem.getFood().getId().equals(item.getFoodId())) {
                 basketItem.setQuantity(item.getQuantity());
@@ -49,12 +61,13 @@ public class BasketService {
             }
         }
 
-        Basket basket = user.getBasket();
-        BasketItem basketItem = new BasketItem(basket, food, item.getQuantity());
-        basket.getBasketItems().add(basketItem);
-        basketRepository.save(basket);
+        BasketItem basketItem = new BasketItem(basketByUser, food, item.getQuantity());
+        basketItemRepository.save(basketItem);
+        basketByUser.getBasketItems().add(basketItem);
+        basketRepository.save(basketByUser);
         return ResponseEntity.ok("Food added to basket successfully");
     }
+
 
     public int getQuantity(Long foodId, User user) {
         if (user.getBasket() == null) {
