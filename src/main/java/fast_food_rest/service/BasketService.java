@@ -57,6 +57,9 @@ public class BasketService {
     }
 
     public int getQuantity(Long foodId, User user) {
+        if (user.getBasket() == null) {
+            return 0;
+        }
         List<BasketItem> basketItems = user.getBasket().getBasketItems();
         for (BasketItem basketItem : basketItems) {
             if (basketItem.getFood().getId().equals(foodId)) {
@@ -84,12 +87,12 @@ public class BasketService {
         try {
             Basket basketByUser = basketRepository.findBasketByUser(user);
             if (basketByUser != null) {
-            basketRepository.delete(basketByUser);
-            userRepository.save(user);
-            return ResponseEntity.ok("FOOD CHECKOUT DONE!");
-            }else
+                basketRepository.delete(basketByUser);
+                userRepository.save(user);
+                return ResponseEntity.ok("FOOD CHECKOUT DONE!");
+            } else
                 return ResponseEntity.badRequest().body("NOTHING TO CHECKOUT");
-        }catch (Exception e) {
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body("CHECKOUT FAILED.");
         }
     }
