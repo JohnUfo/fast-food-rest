@@ -1,18 +1,15 @@
 package fast_food_rest.loader;
 
 import fast_food_rest.entity.Category;
-import fast_food_rest.entity.Food;
 import fast_food_rest.entity.Role;
 import fast_food_rest.repository.CategoryRepository;
 import fast_food_rest.repository.FoodRepository;
 import fast_food_rest.repository.RoleRepository;
-import fast_food_rest.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Profile;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 @Component

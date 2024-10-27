@@ -1,22 +1,14 @@
 package fast_food_rest.service;
 
-import fast_food_rest.entity.Attachment;
-import fast_food_rest.entity.AttachmentContent;
 import fast_food_rest.entity.Category;
-import fast_food_rest.entity.Food;
 import fast_food_rest.payload.CategoryDto;
-import fast_food_rest.payload.FoodDto;
-import fast_food_rest.repository.AttachmentRepository;
 import fast_food_rest.repository.CategoryRepository;
-import fast_food_rest.repository.FoodRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.constraints.NotNull;
-import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
